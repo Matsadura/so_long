@@ -24,6 +24,7 @@ int		check_map_extension(char *file_name);
 int		open_map(char *file_name);
 int		is_rectangular(char **map);
 int		is_closed_map(char **map);
+int		is_valid_map_lines(char **map);
 char	**read_map(int map_fd);
 
 /* 2D Array Functions */
