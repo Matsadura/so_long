@@ -6,11 +6,12 @@
 /*   By: zzaoui <zzaoui@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 20:29:33 by zzaoui            #+#    #+#             */
-/*   Updated: 2025/02/01 20:29:35 by zzaoui           ###   ########.fr       */
+/*   Updated: 2025/02/02 17:32:07 by zzaoui           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft/ft_printf.h"
+#include "libft/get_next_line_bonus.h"
+#include "so_long.h"
 
 /**
  * check_map_extension - Checks the extension of the file
@@ -43,7 +44,7 @@ int	open_map(char *file_name)
 		return (-1);
 	if (check_map_extension(file_name) == 0)
 	{
-		ft_dprintf(2, "%s: is not a valid .ber file\n", file_name);
+		ft_dprintf(STDERR, "%s: is not a valid .ber file\n", file_name);
 		exit(1);
 	}
 	fd = open(file_name, O_RDONLY);
@@ -53,4 +54,31 @@ int	open_map(char *file_name)
 		exit(1);
 	}
 	return (fd);
+}
+
+/**
+ * read_map - Reads a map file
+ * @file_name: The map's name
+ * Return: An array of arrays representing the map
+ */
+char	**read_map(int map_fd)
+{
+	char	*line;
+	char	*tmp;
+	char	**map;
+
+	if (map_fd < 0)
+		return (NULL);
+	line = get_next_line(map_fd);
+	tmp = ft_strjoin_gnl(line, "");
+	while (line != NULL)
+	{
+		line = get_next_line(map_fd);
+		tmp = ft_strjoin_gnl(tmp, line);
+		free(line);
+	}
+	map = ft_split(tmp, '\n');
+	free(line);
+	free(tmp);
+	return (map);
 }
