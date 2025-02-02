@@ -58,7 +58,7 @@ int	open_map(char *file_name)
 
 /**
  * read_map - Reads a map file
- * @file_name: The map's name
+ * @map_fd: The map's name
  * Return: An array of arrays representing the map
  */
 char	**read_map(int map_fd)
