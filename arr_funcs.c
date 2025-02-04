@@ -23,7 +23,7 @@ void	print_2darray(char **arr)
 	i = 0;
 	while (arr[i])
 	{
-		ft_putstr_fd(arr[i], 1);
+		ft_printf("%s\n", arr[i]);
 		i++;
 	}
 }

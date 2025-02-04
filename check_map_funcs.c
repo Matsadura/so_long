@@ -6,7 +6,7 @@
 /*   By: zzaoui <zzaoui@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/02 18:09:10 by zzaoui            #+#    #+#             */
-/*   Updated: 2025/02/02 20:29:46 by zzaoui           ###   ########.fr       */
+/*   Updated: 2025/02/04 19:37:08 by zzaoui           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,7 +107,7 @@ static int	check_middle_rows(char **map, int rowN)
  * @map: An array of arrays represanting the map
  * Return: True if surrounded, False otherwise
  */
-int	is_closed_map(char **map)
+void	is_closed_map(char **map)
 {
 	int	row;
 
@@ -128,5 +128,4 @@ int	is_closed_map(char **map)
 		free_2darray(map);
 		exit(1);
 	}
-	return (TRUE);
 }

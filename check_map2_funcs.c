@@ -6,7 +6,7 @@
 /*   By: zzaoui <zzaoui@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/02 20:30:13 by zzaoui            #+#    #+#             */
-/*   Updated: 2025/02/03 12:57:15 by zzaoui           ###   ########.fr       */
+/*   Updated: 2025/02/04 19:36:59 by zzaoui           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ static int	is_valid_line(char *map_line)
  * @map: An array of arrays representing the map
  * Return: True if valid, False otherwise
  */
-int	is_valid_map_lines(char **map)
+void	is_valid_map_lines(char **map)
 {
 	int	i;
 
@@ -71,7 +71,6 @@ int	is_valid_map_lines(char **map)
 		}
 		i++;
 	}
-	return (TRUE);
 }
 
 /**
@@ -105,7 +104,7 @@ static void	count_elements(char **map, int *p, int *e, int *c)
  * @map: An array of arrays representing the map
  * Return: True of correct count of elements exist
  */
-int	does_contain_all(char **map)
+void	does_contain_all(char **map)
 {
 	int	p;
 	int	e;
@@ -122,5 +121,4 @@ duplicate or unsufficiant elements\n");
 		free_2darray(map);
 		exit(1);
 	}
-	return (TRUE);
 }
