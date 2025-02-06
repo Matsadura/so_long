@@ -27,6 +27,7 @@ typedef struct s_map
 	int	cols;
 	int	collects;
 	int	c_count;
+	char	**map;
 }	t_map;
 
 /* Map handling functions */
@@ -40,6 +41,9 @@ int		is_exit_reachable(char **map);
 char	**read_map(int map_fd);
 void	check_valid_paths(char **map);
 void	is_map_fully_valid(char **map);
+void	find_coordinates(char **map, t_map *info);
+int		count_collectibles(char **map);
+t_map	read_and_check_map(char *file_name);
 
 /* 2D Array Functions */
 void	print_2darray(char **arr);

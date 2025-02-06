@@ -6,7 +6,7 @@
 /*   By: zzaoui <zzaoui@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 17:42:52 by zzaoui            #+#    #+#             */
-/*   Updated: 2025/02/04 19:19:16 by zzaoui           ###   ########.fr       */
+/*   Updated: 2025/02/05 15:26:40 by zzaoui           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
  * @map: An array of arrays representing the map
  * Return: Number of collectibles
  */
-static int	count_collectibles(char **map)
+int	count_collectibles(char **map)
 {
 	int	i;
 	int	j;
@@ -45,7 +45,7 @@ static int	count_collectibles(char **map)
  * @map: An array of arrays representing the map
  * @info: A map structure
  */
-static void	find_coordinates(char **map, t_map *info)
+void	find_coordinates(char **map, t_map *info)
 {
 	int	i;
 	int	j;

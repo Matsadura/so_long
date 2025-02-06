@@ -6,11 +6,10 @@
 /*   By: zzaoui <zzaoui@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 20:29:33 by zzaoui            #+#    #+#             */
-/*   Updated: 2025/02/02 17:32:07 by zzaoui           ###   ########.fr       */
+/*   Updated: 2025/02/05 16:10:41 by zzaoui           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft/get_next_line_bonus.h"
 #include "so_long.h"
 
 /**
@@ -21,14 +20,14 @@
 int	check_map_extension(char *file_name)
 {
 	if (file_name == NULL)
-		return (0);
+		return (TRUE);
 	if (ft_strlen(file_name) < 5)
-		return (0);
+		return (TRUE);
 	while (ft_strlen(file_name) > 4)
 		file_name++;
 	if (ft_strncmp(file_name, ".ber", 5) == 0)
-		return (1);
-	return (0);
+		return (TRUE);
+	return (FALSE);
 }
 
 /**
@@ -42,18 +41,32 @@ int	open_map(char *file_name)
 
 	if (file_name == NULL)
 		return (-1);
-	if (check_map_extension(file_name) == 0)
+	if (check_map_extension(file_name) == FALSE)
 	{
 		ft_dprintf(STDERR, "%s: is not a valid .ber file\n", file_name);
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	fd = open(file_name, O_RDONLY);
 	if (fd < 0)
 	{
 		perror(file_name);
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	return (fd);
+}
+
+/**
+ *
+ */
+static void	free_and_exit(char *line, int map_fd)
+{
+	while (line != NULL)
+	{
+		free(line);
+		line = get_next_line(map_fd);
+	}
+	ft_dprintf(2, "Error: Invalid map");
+	exit(1);
 }
 
 /**
@@ -69,16 +82,23 @@ char	**read_map(int map_fd)
 
 	if (map_fd < 0)
 		return (NULL);
+	tmp = NULL;
 	line = get_next_line(map_fd);
-	tmp = ft_strjoin_gnl(line, "");
 	while (line != NULL)
 	{
-		line = get_next_line(map_fd);
+		if (line[0] == '\n')
+		{
+			free(tmp);
+			free_and_exit(line, map_fd);
+		}
 		tmp = ft_strjoin_gnl(tmp, line);
 		free(line);
+		line = get_next_line(map_fd);
+		if (tmp == NULL)
+			return (NULL);
 	}
+	if (tmp == NULL)
+		return (NULL);
 	map = ft_split(tmp, '\n');
-	free(line);
-	free(tmp);
-	return (map);
+	return (free(tmp), map);
 }

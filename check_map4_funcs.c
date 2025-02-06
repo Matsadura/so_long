@@ -38,7 +38,8 @@ int	is_exit_reachable(char **map)
 }
 
 /**
- *
+ * is_map_fully_valid - Checks if all map conditions are true
+ * @map: An array of arrays representing the map
  */
 void	is_map_fully_valid(char **map)
 {
@@ -51,4 +52,20 @@ void	is_map_fully_valid(char **map)
 	is_valid_map_lines(map);
 	does_contain_all(map);
 	check_valid_paths(map);
+}
+
+/**
+ * 
+ */
+t_map	read_and_check_map(char *file_name)
+{
+	int		fd;
+	t_map	map_info;
+
+	fd = open_map(file_name);
+	map_info.map = read_map(fd);
+	is_map_fully_valid(map_info.map);
+	find_coordinates(map_info.map, &map_info);
+	map_info.collects = count_collectibles(map_info.map);
+	return(map_info);
 }

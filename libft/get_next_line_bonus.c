@@ -6,7 +6,7 @@
 /*   By: zzaoui <zzaoui@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/24 11:27:26 by zzaoui            #+#    #+#             */
-/*   Updated: 2025/01/26 21:38:10 by zzaoui           ###   ########.fr       */
+/*   Updated: 2025/02/05 16:47:49 by zzaoui           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,27 +95,27 @@ char	*handle_buffer(char **buff, char **read_buff, int count_read, int fd)
  */
 char	*get_next_line(int fd)
 {
-	static char	*buffers[MAX_FD];
+	static char	*buffers;
 	char		*read_buff;
 	char		*line;
 	int			count_read;
 
-	if (fd < 0 || fd >= MAX_FD || BUFFER_SIZE <= 0)
+	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
 	read_buff = malloc(BUFFER_SIZE + 1);
 	if (read_buff == NULL)
 		return (NULL);
 	count_read = 1;
-	if (handle_buffer(&buffers[fd], &read_buff, count_read, fd) == NULL)
+	if (handle_buffer(&buffers, &read_buff, count_read, fd) == NULL)
 	{
 		free(read_buff);
 		return (NULL);
 	}
-	line = ft_find_line(&buffers[fd]);
-	if (line == NULL || buffers[fd][0] == '\0')
+	line = ft_find_line(&buffers);
+	if (line == NULL || buffers[0] == '\0')
 	{
-		free(buffers[fd]);
-		buffers[fd] = NULL;
+		free(buffers);
+		buffers = NULL;
 	}
 	free(read_buff);
 	return (line);
