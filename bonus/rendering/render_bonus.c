@@ -1,16 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   render.c                                           :+:      :+:    :+:   */
+/*   render_bonus.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: zzaoui <zzaoui@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/06 14:33:21 by zzaoui            #+#    #+#             */
-/*   Updated: 2025/02/07 10:47:09 by zzaoui           ###   ########.fr       */
+/*   Updated: 2025/02/07 15:04:38 by zzaoui           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../so_long.h"
+#include "../so_long_bonus.h"
+#include <mlx.h>
 
 /**
  *
@@ -26,12 +27,12 @@ int	img_init(t_game game, t_img imgs[])
 		"sprites/door_02.xpm",
 		"sprites/enemy_01.xpm",
 		"sprites/enemy_02.xpm",
-		"sprites/bg.xpm",
+		"sprites/player_02.xpm",
 		NULL
 	};
 
 	i = 0;
-	while (i < 5)
+	while (i < 8)
 	{
 		imgs[i].img = XPM_I(game.mlx, name[i], &imgs[i].w, &imgs[i].h);
 		if (imgs[i].img == NULL)
@@ -67,6 +68,8 @@ void	render_map(t_game game, t_img imgs[], t_map map)
 				PUT_I(game.mlx, game.mlx_win, imgs[EXIT1].img, j * 64, i * 64);
 			else if (map.map[i][j] == 'C')
 				PUT_I(game.mlx, game.mlx_win, imgs[C].img, j * 64, i * 64);
+			else if (map.map[i][j] == 'N')
+				PUT_I(game.mlx, game.mlx_win, imgs[EN1].img, j * 64, i * 64);
 			j++;
 		}
 		i++;
@@ -84,7 +87,7 @@ int	exit_window(int keycode, t_data *data)
 	{
 		mlx_clear_window(data->game.mlx, data->game.mlx_win);
 		i = 0;
-		while (i < 5)
+		while (i < 8)
 		{
 			mlx_destroy_image(data->game.mlx, data->imgs[i].img);
 			i++;
@@ -107,7 +110,7 @@ void	move_player(t_data *data, int x, int y)
 	int			new_x;
 	int			new_y;
 
-	ft_printf("Moves: %d\n", ++moves);
+	++moves;
 	new_x = data->map.start_x + x;
 	new_y = data->map.start_y + y;
 	if (data->map.map[new_y][new_x] == '1')
@@ -115,6 +118,11 @@ void	move_player(t_data *data, int x, int y)
 	victory(data, new_x, new_y);
 	if (data->map.map[new_y][new_x] == 'C')
 		data->map.c_count++;
+	if (data->map.map[new_y][new_x] == 'N')
+	{
+		ft_printf("Game Over!\n");
+		exit_window(ESC, data);
+	}
 	data->map.map[data->map.start_y][data->map.start_x] = '0';
 	data->map.start_x = new_x;
 	data->map.start_y = new_y;
@@ -122,6 +130,7 @@ void	move_player(t_data *data, int x, int y)
 	fix_door(data, new_x, new_y);
 	mlx_clear_window(data->game.mlx, data->game.mlx_win);
 	render_map(data->game, data->imgs, data->map);
+	put_move_n(data, moves, new_x, new_y);
 }
 
 /**

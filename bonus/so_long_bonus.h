@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   so_long.h                                          :+:      :+:    :+:   */
+/*   so_long_bonus.h                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: zzaoui <zzaoui@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:40:38 by zzaoui            #+#    #+#             */
-/*   Updated: 2025/02/07 10:22:56 by zzaoui           ###   ########.fr       */
+/*   Updated: 2025/02/07 15:25:25 by zzaoui           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef SO_LONG_H
-# define SO_LONG_H
+#ifndef SO_LONG_BONUS_H
+# define SO_LONG_BONUS_H
 # include "../libft/libft.h"
 # include <mlx.h>
 
@@ -28,6 +28,9 @@
 # define C 2
 # define EXIT1 3
 # define EXIT2 4
+# define EN1 5
+# define EN2 6
+# define PLAYER2 7
 
 # define XPM_I mlx_xpm_file_to_image
 # define PUT_I mlx_put_image_to_window
@@ -38,6 +41,8 @@
 # define DOWN 65364
 # define RIGHT 65363
 # define LEFT 65361
+
+# define BLACK 0x000000
 
 typedef struct s_map
 {
@@ -99,9 +104,10 @@ int		exit_window(int keycode, t_data *data);
 void	fix_door(t_data *data, int new_x, int new_y);
 void	victory(t_data *data, int new_x, int new_y);
 int		x_mark(t_data *data);
+void	put_move_n(t_data *data, int moves, int new_x, int new_y);
 
 /* 2D Array Functions */
 void	print_2darray(char **arr);
 void	free_2darray(char **arr);
 
-#endif /* SO_LONG_H */
+#endif /* SO_LONG_BONUS_H */
