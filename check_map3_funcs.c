@@ -45,7 +45,7 @@ int	count_collectibles(char **map)
  * @map: An array of arrays representing the map
  * @info: A map structure
  */
-void	find_coordinates(char **map, t_map *info)
+void	find_coordinates(char **map, t_map *info, char c)
 {
 	int	i;
 	int	j;
@@ -54,21 +54,25 @@ void	find_coordinates(char **map, t_map *info)
 	while (map[info->rows] != NULL)
 		info->rows++;
 	info->cols = ft_strlen(map[0]);
-	i = 0;
-	while (map[i] != NULL)
+	i = -1;
+	while (map[++i] != NULL)
 	{
-		j = 0;
-		while (map[i][j] != '\0')
+		j = -1;
+		while (map[i][++j] != '\0')
 		{
-			if (map[i][j] == 'P')
+			if (map[i][j] == c && c == 'P')
 			{
 				info->start_x = j;
 				info->start_y = i;
 				break ;
 			}
-			j++;
+			else if (map[i][j] == c && c == 'E')
+			{
+				info->exit_x = j;
+				info->exit_y = i;
+				break ;
+			}
 		}
-		i++;
 	}
 }
 
@@ -137,7 +141,7 @@ void	check_valid_paths(char **map)
 	char	**dup_map;
 
 	dup_map = duplicate_map(map);
-	find_coordinates(dup_map, &map_info);
+	find_coordinates(dup_map, &map_info, 'P');
 	map_info.collects = count_collectibles(dup_map);
 	map_info.c_count = 0;
 	dfs(dup_map, map_info.start_x, map_info.start_y, &map_info);

@@ -13,22 +13,69 @@
 #ifndef SO_LONG_H
 # define SO_LONG_H
 # include "libft/libft.h"
+# include <mlx.h>
 
+/* Bools */
 # define TRUE 1
 # define FALSE 0
 
+/* FD */
 # define STDERR 2
+
+/* Sprites */
+# define PLAYER 0
+# define WALL 1
+# define COLLECTIBLE 2
+# define EXIT1 3
+# define EXIT2 4
+
+# define XPM_I mlx_xpm_file_to_image
+
+/* Keycode Macros*/
+# define ESC 65307
+# define UP 65362
+# define DOWN 65364
+# define RIGHT 65363
+# define LEFT 65361
 
 typedef struct s_map
 {
 	int	start_x;
 	int	start_y;
+	int	exit_x;
+	int	exit_y;
 	int	rows;
 	int	cols;
 	int	collects;
 	int	c_count;
 	char	**map;
 }	t_map;
+
+
+typedef struct s_img
+{
+	void	*img;
+	char	addr;
+	int	bits_per_pixed;
+	int	line_length;
+	int	endian;
+	int	h;
+	int	w;
+}	t_img;
+
+
+typedef struct s_game
+{
+	void	*mlx;
+	void	*mlx_win;
+}	t_game;
+
+typedef struct s_data
+{
+	t_game game;
+	t_img *imgs;
+	t_map	map;
+}	t_data;
 
 /* Map handling functions */
 int		check_map_extension(char *file_name);
@@ -41,7 +88,7 @@ int		is_exit_reachable(char **map);
 char	**read_map(int map_fd);
 void	check_valid_paths(char **map);
 void	is_map_fully_valid(char **map);
-void	find_coordinates(char **map, t_map *info);
+void	find_coordinates(char **map, t_map *info, char c);
 int		count_collectibles(char **map);
 t_map	read_and_check_map(char *file_name);
 

@@ -65,7 +65,9 @@ t_map	read_and_check_map(char *file_name)
 	fd = open_map(file_name);
 	map_info.map = read_map(fd);
 	is_map_fully_valid(map_info.map);
-	find_coordinates(map_info.map, &map_info);
+	find_coordinates(map_info.map, &map_info, 'P');
+	find_coordinates(map_info.map, &map_info, 'E');
 	map_info.collects = count_collectibles(map_info.map);
+	map_info.c_count = 0;
 	return(map_info);
 }
