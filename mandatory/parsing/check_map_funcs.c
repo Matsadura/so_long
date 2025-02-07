@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "so_long.h"
+#include "../so_long.h"
 
 /**
  * is_rectangle - Checks if the map is rectangular
@@ -93,8 +93,6 @@ static int	check_middle_rows(char **map, int rowN)
 	i = 1;
 	while (i <= rowN)
 	{
-		ft_printf("start: %c, end: %c\n", map[i][0], \
-				map[i][ft_strlen(map[i]) - 1]);
 		if (map[i][0] != '1' || map[i][ft_strlen(map[i]) - 1] != '1')
 			return (FALSE);
 		i++;

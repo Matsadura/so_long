@@ -6,11 +6,11 @@
 /*   By: zzaoui <zzaoui@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 20:29:33 by zzaoui            #+#    #+#             */
-/*   Updated: 2025/02/05 16:10:41 by zzaoui           ###   ########.fr       */
+/*   Updated: 2025/02/07 09:29:39 by zzaoui           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "so_long.h"
+#include "../so_long.h"
 
 /**
  * check_map_extension - Checks the extension of the file
@@ -65,7 +65,7 @@ static void	free_and_exit(char *line, int map_fd)
 		free(line);
 		line = get_next_line(map_fd);
 	}
-	ft_dprintf(2, "Error: Invalid map");
+	ft_dprintf(2, "Error: Invalid map\n");
 	exit(1);
 }
 

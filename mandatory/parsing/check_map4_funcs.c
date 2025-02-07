@@ -6,11 +6,11 @@
 /*   By: zzaoui <zzaoui@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 18:23:08 by zzaoui            #+#    #+#             */
-/*   Updated: 2025/02/04 19:09:06 by zzaoui           ###   ########.fr       */
+/*   Updated: 2025/02/07 09:24:55 by zzaoui           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "so_long.h"
+#include "../so_long.h"
 
 /**
  * is_exit_reachable - Checks if there is a path to the EXIT
@@ -45,7 +45,7 @@ void	is_map_fully_valid(char **map)
 {
 	if (is_rectangular(map) == FALSE)
 	{
-		ft_dprintf(2, "Error: Map is not rectangular");
+		ft_dprintf(STDERR, "Error: Map is not rectangular\n");
 		free_2darray(map);
 	}
 	is_closed_map(map);
@@ -55,7 +55,7 @@ void	is_map_fully_valid(char **map)
 }
 
 /**
- * 
+ *
  */
 t_map	read_and_check_map(char *file_name)
 {
@@ -67,7 +67,13 @@ t_map	read_and_check_map(char *file_name)
 	is_map_fully_valid(map_info.map);
 	find_coordinates(map_info.map, &map_info, 'P');
 	find_coordinates(map_info.map, &map_info, 'E');
+	if (map_info.rows > 21 || map_info.cols > 40)
+	{
+		free_2darray(map_info.map);
+		ft_dprintf(STDERR, "Error: Map is too large\n");
+		exit(1);
+	}
 	map_info.collects = count_collectibles(map_info.map);
 	map_info.c_count = 0;
-	return(map_info);
+	return (map_info);
 }

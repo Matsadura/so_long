@@ -6,11 +6,11 @@
 /*   By: zzaoui <zzaoui@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 17:42:52 by zzaoui            #+#    #+#             */
-/*   Updated: 2025/02/05 15:26:40 by zzaoui           ###   ########.fr       */
+/*   Updated: 2025/02/07 09:23:29 by zzaoui           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "so_long.h"
+#include "../so_long.h"
 
 /**
  * count_collectibles - Counts the 'C' in the map
@@ -47,9 +47,7 @@ int	count_collectibles(char **map)
  */
 void	find_coordinates(char **map, t_map *info, char c)
 {
-	int	i;
-	int	j;
-
+	int (i), (j);
 	info->rows = 0;
 	while (map[info->rows] != NULL)
 		info->rows++;

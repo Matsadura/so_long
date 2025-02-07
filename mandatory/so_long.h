@@ -6,13 +6,13 @@
 /*   By: zzaoui <zzaoui@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:40:38 by zzaoui            #+#    #+#             */
-/*   Updated: 2025/02/04 19:40:02 by zzaoui           ###   ########.fr       */
+/*   Updated: 2025/02/07 10:22:56 by zzaoui           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SO_LONG_H
 # define SO_LONG_H
-# include "libft/libft.h"
+# include "../libft/libft.h"
 # include <mlx.h>
 
 /* Bools */
@@ -40,29 +40,27 @@
 
 typedef struct s_map
 {
-	int	start_x;
-	int	start_y;
-	int	exit_x;
-	int	exit_y;
-	int	rows;
-	int	cols;
-	int	collects;
-	int	c_count;
+	int		start_x;
+	int		start_y;
+	int		exit_x;
+	int		exit_y;
+	int		rows;
+	int		cols;
+	int		collects;
+	int		c_count;
 	char	**map;
 }	t_map;
-
 
 typedef struct s_img
 {
 	void	*img;
 	char	addr;
-	int	bits_per_pixed;
-	int	line_length;
-	int	endian;
-	int	h;
-	int	w;
+	int		bits_per_pixed;
+	int		line_length;
+	int		endian;
+	int		h;
+	int		w;
 }	t_img;
-
 
 typedef struct s_game
 {
@@ -72,8 +70,8 @@ typedef struct s_game
 
 typedef struct s_data
 {
-	t_game game;
-	t_img *imgs;
+	t_game	game;
+	t_img	*imgs;
 	t_map	map;
 }	t_data;
 
@@ -91,6 +89,11 @@ void	is_map_fully_valid(char **map);
 void	find_coordinates(char **map, t_map *info, char c);
 int		count_collectibles(char **map);
 t_map	read_and_check_map(char *file_name);
+int		img_init(t_game game, t_img imgs[]);
+void  render_map(t_game game, t_img imgs[], t_map map);
+
+/* Game Logic */
+int	on_keypress(int key, t_data *data);
 
 /* 2D Array Functions */
 void	print_2darray(char **arr);
