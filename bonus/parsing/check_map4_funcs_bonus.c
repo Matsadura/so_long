@@ -6,7 +6,7 @@
 /*   By: zzaoui <zzaoui@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 18:23:08 by zzaoui            #+#    #+#             */
-/*   Updated: 2025/02/07 14:35:51 by zzaoui           ###   ########.fr       */
+/*   Updated: 2025/02/08 17:17:15 by zzaoui           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ void	is_map_fully_valid(char **map)
 	{
 		ft_dprintf(STDERR, "Error: Map is not rectangular\n");
 		free_2darray(map);
+		exit(1);
 	}
 	is_closed_map(map);
 	is_valid_map_lines(map);
@@ -73,6 +74,7 @@ t_map	read_and_check_map(char *file_name)
 		ft_dprintf(STDERR, "Error: Map is too large\n");
 		exit(1);
 	}
+	get_enemies(&map_info);
 	map_info.collects = count_collectibles(map_info.map);
 	map_info.c_count = 0;
 	return (map_info);

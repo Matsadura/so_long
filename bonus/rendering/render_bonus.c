@@ -6,7 +6,7 @@
 /*   By: zzaoui <zzaoui@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/06 14:33:21 by zzaoui            #+#    #+#             */
-/*   Updated: 2025/02/07 15:04:38 by zzaoui           ###   ########.fr       */
+/*   Updated: 2025/02/08 16:54:20 by zzaoui           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,20 +19,14 @@
 int	img_init(t_game game, t_img imgs[])
 {
 	int			i;
-	static char	*name[] = {
-		"sprites/player_01.xpm",
-		"sprites/wall_01.xpm",
-		"sprites/effect_w.xpm",
-		"sprites/door_01.xpm",
-		"sprites/door_02.xpm",
-		"sprites/enemy_01.xpm",
-		"sprites/enemy_02.xpm",
-		"sprites/player_02.xpm",
-		NULL
-	};
+	static char	*name[] = {"sprites/player_01.xpm", "sprites/wall_01.xpm",
+		"sprites/effect_w.xpm", "sprites/door_01.xpm",
+		"sprites/door_02.xpm", "sprites/enemy_01.xpm",
+		"sprites/enemy_02.xpm", "sprites/player_02.xpm", "sprites/bg.xpm",
+		NULL};
 
 	i = 0;
-	while (i < 8)
+	while (i < 9)
 	{
 		imgs[i].img = XPM_I(game.mlx, name[i], &imgs[i].w, &imgs[i].h);
 		if (imgs[i].img == NULL)
@@ -47,33 +41,18 @@ int	img_init(t_game game, t_img imgs[])
 /**
  *
  */
-void	render_map(t_game game, t_img imgs[], t_map map)
+int	render_map(t_data *d)
 {
-	int	i;
-	int	j;
-
-	i = 0;
-	while (i < map.rows)
+	int (i), (j);
+	update_enemy(d);
+	i = -1;
+	while (++i < d->map.rows)
 	{
-		j = 0;
-		while (j < map.cols)
-		{
-			if (map.map[i][j] == '1')
-				PUT_I(game.mlx, game.mlx_win, imgs[WALL].img, j * 64, i * 64);
-			else if (j == map.start_x && i == map.start_y)
-				PUT_I(game.mlx, game.mlx_win, imgs[PLAYER].img, j * 64, i * 64);
-			else if (map.map[i][j] == 'E' && map.c_count == map.collects)
-				PUT_I(game.mlx, game.mlx_win, imgs[EXIT2].img, j * 64, i * 64);
-			else if (map.map[i][j] == 'E')
-				PUT_I(game.mlx, game.mlx_win, imgs[EXIT1].img, j * 64, i * 64);
-			else if (map.map[i][j] == 'C')
-				PUT_I(game.mlx, game.mlx_win, imgs[C].img, j * 64, i * 64);
-			else if (map.map[i][j] == 'N')
-				PUT_I(game.mlx, game.mlx_win, imgs[EN1].img, j * 64, i * 64);
-			j++;
-		}
-		i++;
+		j = -1;
+		while (++j < d->map.cols)
+			render_map_mini(d, i, j);
 	}
+	return (put_move_n(d, d->moves, d->map.start_x, d->map.start_y), 0);
 }
 
 /**
@@ -87,7 +66,7 @@ int	exit_window(int keycode, t_data *data)
 	{
 		mlx_clear_window(data->game.mlx, data->game.mlx_win);
 		i = 0;
-		while (i < 8)
+		while (i < 9)
 		{
 			mlx_destroy_image(data->game.mlx, data->imgs[i].img);
 			i++;
@@ -95,6 +74,7 @@ int	exit_window(int keycode, t_data *data)
 		mlx_destroy_window(data->game.mlx, data->game.mlx_win);
 		mlx_destroy_display(data->game.mlx);
 		free(data->game.mlx);
+		free(data->map.enemies);
 		free_2darray(data->map.map);
 		exit(0);
 	}
@@ -106,11 +86,10 @@ int	exit_window(int keycode, t_data *data)
  */
 void	move_player(t_data *data, int x, int y)
 {
-	static int	moves;
-	int			new_x;
-	int			new_y;
+	int	new_x;
+	int	new_y;
 
-	++moves;
+	++data->moves;
 	new_x = data->map.start_x + x;
 	new_y = data->map.start_y + y;
 	if (data->map.map[new_y][new_x] == '1')
@@ -129,8 +108,7 @@ void	move_player(t_data *data, int x, int y)
 	data->map.map[new_y][new_x] = 'P';
 	fix_door(data, new_x, new_y);
 	mlx_clear_window(data->game.mlx, data->game.mlx_win);
-	render_map(data->game, data->imgs, data->map);
-	put_move_n(data, moves, new_x, new_y);
+	render_map(data);
 }
 
 /**

@@ -47,6 +47,7 @@ void	is_map_fully_valid(char **map)
 	{
 		ft_dprintf(STDERR, "Error: Map is not rectangular\n");
 		free_2darray(map);
+		exit(1);
 	}
 	is_closed_map(map);
 	is_valid_map_lines(map);

@@ -6,7 +6,7 @@
 /*   By: zzaoui <zzaoui@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 17:42:52 by zzaoui            #+#    #+#             */
-/*   Updated: 2025/02/07 14:35:40 by zzaoui           ###   ########.fr       */
+/*   Updated: 2025/02/08 16:57:05 by zzaoui           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,8 +115,7 @@ static char	**duplicate_map(char **map)
  */
 static void	dfs(char **map, int x, int y, t_map *map_info)
 {
-	if (x <= 0 || x >= map_info->cols
-		|| y <= 0 || y >= map_info->rows
+	if (x <= 0 || x >= map_info->cols || y <= 0 || y >= map_info->rows
 		|| map[y][x] == '1' || map[y][x] == '#')
 		return ;
 	if (map[y][x] == 'C')

@@ -19,13 +19,16 @@
  */
 int	check_map_extension(char *file_name)
 {
+	char	*str;
+
 	if (file_name == NULL)
 		return (TRUE);
 	if (ft_strlen(file_name) < 5)
 		return (TRUE);
-	while (ft_strlen(file_name) > 4)
-		file_name++;
-	if (ft_strncmp(file_name, ".ber", 5) == 0)
+	str = ft_strchr(file_name, '.');
+	if (str == NULL)
+		return (FALSE);
+	if (ft_strncmp(str, ".ber", 5) == 0)
 		return (TRUE);
 	return (FALSE);
 }

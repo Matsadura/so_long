@@ -6,7 +6,7 @@
 /*   By: zzaoui <zzaoui@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:40:38 by zzaoui            #+#    #+#             */
-/*   Updated: 2025/02/07 15:25:25 by zzaoui           ###   ########.fr       */
+/*   Updated: 2025/02/08 17:17:54 by zzaoui           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@
 # define EN1 5
 # define EN2 6
 # define PLAYER2 7
+# define BG 8
 
 # define XPM_I mlx_xpm_file_to_image
 # define PUT_I mlx_put_image_to_window
@@ -44,6 +45,13 @@
 
 # define BLACK 0x000000
 
+typedef struct s_enemy
+{
+	int		x;
+	int		y;
+	int		direction;
+}			t_enemy;
+
 typedef struct s_map
 {
 	int		start_x;
@@ -55,7 +63,9 @@ typedef struct s_map
 	int		collects;
 	int		c_count;
 	char	**map;
-}	t_map;
+	int		enemy_count;
+	t_enemy	*enemies;
+}			t_map;
 
 typedef struct s_img
 {
@@ -66,48 +76,56 @@ typedef struct s_img
 	int		endian;
 	int		h;
 	int		w;
-}	t_img;
+}			t_img;
 
 typedef struct s_game
 {
 	void	*mlx;
 	void	*mlx_win;
-}	t_game;
+}			t_game;
 
 typedef struct s_data
 {
 	t_game	game;
 	t_img	*imgs;
 	t_map	map;
-}	t_data;
+	int		moves;
+	int		direction;
+}			t_data;
 
 /* Map handling functions */
-int		check_map_extension(char *file_name);
-int		open_map(char *file_name);
-int		is_rectangular(char **map);
-void	is_closed_map(char **map);
-void	is_valid_map_lines(char **map);
-void	does_contain_all(char **map);
-int		is_exit_reachable(char **map);
-char	**read_map(int map_fd);
-void	check_valid_paths(char **map);
-void	is_map_fully_valid(char **map);
-void	find_coordinates(char **map, t_map *info, char c);
-int		count_collectibles(char **map);
-t_map	read_and_check_map(char *file_name);
-int		img_init(t_game game, t_img imgs[]);
-void	render_map(t_game game, t_img imgs[], t_map map);
+int			check_map_extension(char *file_name);
+int			open_map(char *file_name);
+int			is_rectangular(char **map);
+void		is_closed_map(char **map);
+void		is_valid_map_lines(char **map);
+void		does_contain_all(char **map);
+int			is_exit_reachable(char **map);
+char		**read_map(int map_fd);
+void		check_valid_paths(char **map);
+void		is_map_fully_valid(char **map);
+void		find_coordinates(char **map, t_map *info, char c);
+int			count_collectibles(char **map);
+t_map		read_and_check_map(char *file_name);
+int			img_init(t_game game, t_img imgs[]);
+// void	render_map(t_game game, t_img imgs[], t_map map, t_data *data);
+int			render_map(t_data *data);
 
 /* Game Logic */
-int		on_keypress(int key, t_data *data);
-int		exit_window(int keycode, t_data *data);
-void	fix_door(t_data *data, int new_x, int new_y);
-void	victory(t_data *data, int new_x, int new_y);
-int		x_mark(t_data *data);
-void	put_move_n(t_data *data, int moves, int new_x, int new_y);
+int			on_keypress(int key, t_data *data);
+int			exit_window(int keycode, t_data *data);
+void		fix_door(t_data *data, int new_x, int new_y);
+void		victory(t_data *data, int new_x, int new_y);
+int			x_mark(t_data *data);
+void		put_move_n(t_data *data, int moves, int new_x, int new_y);
+void		put_p_img(t_data *data, t_img imgs[], int j, int i);
+void		put_n_img(t_data *data, t_img imgs[], int j, int i);
+void		render_map_mini(t_data *data, int x, int y);
+void		update_enemy(t_data *d);
+void		get_enemies(t_map *map);
 
 /* 2D Array Functions */
-void	print_2darray(char **arr);
-void	free_2darray(char **arr);
+void		print_2darray(char **arr);
+void		free_2darray(char **arr);
 
 #endif /* SO_LONG_BONUS_H */

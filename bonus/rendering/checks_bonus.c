@@ -6,7 +6,7 @@
 /*   By: zzaoui <zzaoui@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/07 13:58:35 by zzaoui            #+#    #+#             */
-/*   Updated: 2025/02/07 15:22:47 by zzaoui           ###   ########.fr       */
+/*   Updated: 2025/02/08 17:01:04 by zzaoui           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,24 @@ void	put_move_n(t_data *data, int moves, int new_x, int new_y)
 	x = new_x * 64 + 28;
 	y = new_y * 64 + 40;
 	ft_memset(buff, 0, 127);
-	mlx_string_put(data->game.mlx, data->game.mlx_win, x, y, \
-		BLACK, ft_itoa_buff(buff, moves));
+	mlx_string_put(data->game.mlx, data->game.mlx_win, x, y, BLACK,
+		ft_itoa_buff(buff, moves));
+}
+
+/**
+ *
+ */
+void	put_p_img(t_data *d, t_img imgs[], int j, int i)
+{
+	static int	f;
+	int			x;
+	int			y;
+
+	x = j * 64;
+	y = i * 64;
+	++f;
+	if (f % 600 < 300)
+		PUT_I(d->game.mlx, d->game.mlx_win, imgs[PLAYER].img, x, y);
+	else
+		PUT_I(d->game.mlx, d->game.mlx_win, imgs[PLAYER2].img, x, y);
 }
