@@ -1,4 +1,4 @@
-# SO LONG: a street-crossing arcade game
+# SO LONG: a street-crossing arcade game 
 
 A street-crossing arcade game written in C with SDL2. It builds both as a native Linux binary and as **WebAssembly** for the browser.
 
