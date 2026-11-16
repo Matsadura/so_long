@@ -36,9 +36,13 @@ void	player_respawn(t_game *g)
 
 void	player_kill(t_game *g, t_death cause)
 {
+	static const unsigned	ev[] = {0, EV_CAR, EV_SPLASH, EV_CAUGHT,
+		EV_TIME_UP};
+
 	if (g->state != GAME_PLAYING)
 		return ;
 	g->death = cause;
+	g->events |= ev[cause];
 	g->state = GAME_DYING;
 	g->state_timer = DEATH_SECONDS;
 	g->combo = 0;
@@ -72,6 +76,7 @@ static void	start_hop(t_game *g, t_dir dir)
 	p->hop_t = 0.0f;
 	p->hopping = true;
 	g->moves++;
+	g->events |= EV_HOP;
 }
 
 /* Hops are buffered: a press during a hop starts right after it lands. */
@@ -97,9 +102,11 @@ static void	stage_clear(t_game *g)
 	{
 		score_commit_best(g);
 		g->state = GAME_VICTORY;
+		g->events |= EV_VICTORY;
 		return ;
 	}
 	g->state = GAME_STAGE_CLEAR;
+	g->events |= EV_STAGE_CLEAR;
 	g->state_timer = CLEAR_SECONDS;
 }
 
@@ -113,6 +120,7 @@ static void	reach_goal(t_game *g, int x, int y)
 	}
 	g->tiles[y * g->map.cols + x] = TILE_GOAL_FILLED;
 	g->goals_filled++;
+	g->events |= EV_GOAL;
 	score_add(g, SCORE_GOAL + (int)g->time_left * SCORE_TIME_PER_SEC,
 		(float)x, (float)y);
 	if (g->goals_filled == g->map.goals)
@@ -148,6 +156,7 @@ static void	land(t_game *g)
 			= (row_kind(g, y) == LANE_ROAD) ? TILE_ROAD : TILE_FLOOR;
 		g->collected++;
 		score_coin(g, (float)x, (float)y);
+		g->events |= EV_COIN;
 	}
 	else if (t == TILE_EXIT)
 		reach_goal(g, x, y);

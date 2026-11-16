@@ -50,10 +50,10 @@ static void	title_screen(t_platform *p, const t_renderer *r, const t_game *g)
 	gap(&s, 22);
 #ifdef __EMSCRIPTEN__
 	line(&s, "ARROWS / WASD  HOP     P / ESC  PAUSE", 2, COLOR_TEXT);
-	line(&s, "R  RETRY STAGE     ENTER  CONTINUE", 2, COLOR_TEXT);
+	line(&s, "R  RETRY STAGE     M  MUTE", 2, COLOR_TEXT);
 #else
 	line(&s, "ARROWS / WASD  HOP     P  PAUSE", 2, COLOR_TEXT);
-	line(&s, "R  RETRY STAGE     ESC  QUIT", 2, COLOR_TEXT);
+	line(&s, "R  RETRY STAGE     M  MUTE     ESC  QUIT", 2, COLOR_TEXT);
 #endif
 	gap(&s, 10);
 	line(&s, "DODGE TRAFFIC, RIDE THE LOGS, FILL EVERY GOAL", 2,
@@ -164,7 +164,8 @@ void	screens_draw(t_platform *p, const t_renderer *r, const t_game *g)
 	{
 		s = dim(p, r, 110);
 		line(&s, "PAUSED", 8, COLOR_TEXT);
-		line(&s, "P / ENTER: RESUME     R: RETRY STAGE", 2, COLOR_MUTED);
+		line(&s, "P / ENTER: RESUME     R: RETRY STAGE     M: MUTE", 2,
+			COLOR_MUTED);
 	}
 	else if (g->state == GAME_STAGE_CLEAR)
 		stage_clear(p, r, g);

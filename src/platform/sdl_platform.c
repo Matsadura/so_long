@@ -1,6 +1,5 @@
-#include "platform.h"
+#include "sdl_internal.h"
 
-#include <SDL.h>
 #include <SDL_image.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -8,8 +7,6 @@
 #ifdef __EMSCRIPTEN__
 # include <emscripten.h>
 #endif
-
-#define MAX_TEXTURES 64
 
 #ifdef __EMSCRIPTEN__
 /* Native windows are resizable; in the browser the canvas keeps the
@@ -33,17 +30,6 @@ EM_JS(void, js_save_best, (int score), {
 #else
 # define WINDOW_FLAGS (SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)
 #endif
-
-struct s_platform
-{
-	SDL_Window		*window;
-	SDL_Renderer	*renderer;
-	SDL_Texture		*textures[MAX_TEXTURES];
-	bool			img_ready;
-	bool			vsync;
-	int				logical_w;
-	int				logical_h;
-};
 
 const char	*platform_error(void)
 {
@@ -104,6 +90,7 @@ void	platform_destroy(t_platform *p)
 
 	if (p == NULL)
 		return ;
+	platform_audio_close(p);
 	i = 0;
 	while (i < MAX_TEXTURES)
 	{

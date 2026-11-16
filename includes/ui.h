@@ -93,4 +93,36 @@ void	hud_draw(t_platform *p, const t_renderer *r, const t_game *g);
 /* src/ui/screens.c: title, banners and end screens. */
 void	screens_draw(t_platform *p, const t_renderer *r, const t_game *g);
 
+/* src/ui/sound.c: maps game events and states to effects and music. */
+typedef enum e_sfx
+{
+	SND_HOP,
+	SND_COIN_1,
+	SND_COIN_2,
+	SND_COIN_3,
+	SND_COIN_4,
+	SND_COIN_5,
+	SND_GOAL,
+	SND_SPLAT,
+	SND_SPLASH,
+	SND_CAUGHT,
+	SND_TIME_UP,
+	SND_START,
+	SND_PAUSE,
+	SND_JINGLE_CLEAR,
+	SND_JINGLE_OVER,
+	SND_JINGLE_VICTORY,
+	SND_MUSIC_GAME,
+	SND_MUSIC_TITLE,
+	SND_COUNT
+}	t_sfx;
+
+typedef struct s_sound_bank
+{
+	t_sound	sounds[SND_COUNT];
+}	t_sound_bank;
+
+void	sound_init(t_sound_bank *b, t_platform *p);
+void	sound_update(const t_sound_bank *b, t_platform *p, const t_game *g);
+
 #endif

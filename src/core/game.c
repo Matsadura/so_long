@@ -117,7 +117,10 @@ void	game_new_run(t_game *g)
 	g->moves = 0;
 	g->new_best = false;
 	if (game_load_level(g, 0) == MAP_OK)
+	{
 		g->state = GAME_PLAYING;
+		g->events |= EV_START;
+	}
 }
 
 void	game_retry_stage(t_game *g)
@@ -127,6 +130,7 @@ void	game_retry_stage(t_game *g)
 	g->moves = g->stage_start_moves;
 	game_reset_stage(g);
 	g->state = GAME_PLAYING;
+	g->events |= EV_START;
 }
 
 static void	advance_stage(t_game *g)
@@ -161,9 +165,15 @@ static void	handle_action(t_game *g, t_action a)
 		&& a == ACT_RESTART)
 		game_retry_stage(g);
 	else if (s == GAME_PLAYING && a == ACT_PAUSE)
+	{
 		g->state = GAME_PAUSED;
+		g->events |= EV_PAUSE;
+	}
 	else if (s == GAME_PAUSED && (a == ACT_PAUSE || a == ACT_CONFIRM))
+	{
 		g->state = GAME_PLAYING;
+		g->events |= EV_PAUSE;
+	}
 	else if (s == GAME_STAGE_CLEAR && a == ACT_CONFIRM)
 		advance_stage(g);
 	else if (s == GAME_PLAYING)
@@ -179,6 +189,7 @@ static void	finish_dying(t_game *g)
 		g->lives = 0;
 		score_commit_best(g);
 		g->state = GAME_OVER;
+		g->events |= EV_GAME_OVER;
 		return ;
 	}
 	player_respawn(g);

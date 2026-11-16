@@ -55,6 +55,23 @@ typedef enum e_death
 	DEATH_TIME
 }	t_death;
 
+/*
+** One-frame notifications for presentation (sound effects, etc.). The core
+** only sets bits; main clears them at the start of every tick.
+*/
+# define EV_HOP          (1u << 0)
+# define EV_COIN         (1u << 1)
+# define EV_GOAL         (1u << 2)
+# define EV_CAR          (1u << 3)
+# define EV_SPLASH       (1u << 4)
+# define EV_CAUGHT       (1u << 5)
+# define EV_TIME_UP      (1u << 6)
+# define EV_STAGE_CLEAR  (1u << 7)
+# define EV_GAME_OVER    (1u << 8)
+# define EV_VICTORY      (1u << 9)
+# define EV_START        (1u << 10)
+# define EV_PAUSE        (1u << 11)
+
 typedef enum e_dir
 {
 	DIR_UP,
@@ -140,6 +157,8 @@ typedef struct s_game
 	int					clear_stage_bonus;
 	bool				new_best;
 	t_popup				popups[MAX_POPUPS];
+
+	unsigned			events;
 
 	t_map_error			error;
 	int					error_level;

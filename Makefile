@@ -25,10 +25,12 @@ SRC         := src/main.c \
                src/map/levels.c \
                src/platform/sdl_platform.c \
                src/platform/sdl_input.c \
+               src/platform/sdl_audio.c \
                src/ui/render.c \
                src/ui/hud.c \
                src/ui/font.c \
-               src/ui/screens.c
+               src/ui/screens.c \
+               src/ui/sound.c
 
 BUILD_DIR   := build/native
 OBJ         := $(SRC:%.c=$(BUILD_DIR)/%.o)
@@ -51,15 +53,17 @@ WEB_SHELL   := $(WEB_DIR)/shell.html
 WASM_FLAGS  := -Wall -Wextra -Werror -std=c11 -D_DEFAULT_SOURCE -Iincludes -O2 \
                -sUSE_SDL=2 -sUSE_SDL_IMAGE=2 -sSDL2_IMAGE_FORMATS='["png"]' \
                -sALLOW_MEMORY_GROWTH=1 -sENVIRONMENT=web \
-               -sEXPORTED_FUNCTIONS='["_main","_web_action"]' \
+               -sEXPORTED_FUNCTIONS='["_main","_web_action","_web_is_muted"]' \
                -sEXPORTED_RUNTIME_METHODS='["ccall"]' \
                --preload-file assets/sprites --preload-file assets/maps \
+               --preload-file assets/sounds \
                --shell-file $(WEB_SHELL)
 
 wasm: $(WEB_OUT)
 
 $(WEB_OUT): $(SRC) $(wildcard includes/*.h) $(WEB_SHELL) \
-            $(wildcard assets/sprites/*.png) $(wildcard assets/maps/*.ber)
+            $(wildcard assets/sprites/*.png) $(wildcard assets/maps/*.ber) \
+            $(wildcard assets/sounds/*.wav)
 	$(EMCC) $(WASM_FLAGS) $(SRC) -o $@
 
 test: $(NAME)

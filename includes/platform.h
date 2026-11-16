@@ -16,6 +16,10 @@ typedef struct s_platform	t_platform;
 typedef int					t_tex;
 # define TEX_NONE			(-1)
 
+/* Handle into the platform's sound cache. */
+typedef int					t_sound;
+# define SOUND_NONE			(-1)
+
 typedef enum e_action
 {
 	ACT_UP,
@@ -25,6 +29,7 @@ typedef enum e_action
 	ACT_CONFIRM,
 	ACT_RESTART,
 	ACT_PAUSE,
+	ACT_MUTE,
 	ACT_QUIT
 }	t_action;
 
@@ -78,5 +83,24 @@ void		platform_clear_clip(t_platform *p);
 void		platform_fill_rect(t_platform *p, int x, int y, int w, int h,
 				uint32_t rgba);
 void		platform_present(t_platform *p);
+
+/*
+** Audio: a small software mixer (several effect voices plus one looping
+** music voice). Every call is a safe no-op when no audio device could be
+** opened, so the game simply runs silently.
+*/
+bool		platform_audio_open(t_platform *p);
+t_sound		platform_load_sound(t_platform *p, const char *path);
+/* volume: 0.0 .. 1.0 */
+void		platform_play_sound(t_platform *p, t_sound s, float volume);
+/* Loops s; keeps playing (no restart) if s is already the current track. */
+void		platform_play_music(t_platform *p, t_sound s, float volume);
+void		platform_stop_music(t_platform *p);
+void		platform_pause_music(t_platform *p, bool paused);
+void		platform_set_muted(t_platform *p, bool muted);
+bool		platform_is_muted(const t_platform *p);
+/* Mute preference: localStorage in the browser, session-only natively. */
+bool		platform_load_muted(void);
+void		platform_save_muted(bool muted);
 
 #endif

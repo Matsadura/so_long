@@ -24,6 +24,8 @@ static void	map_key(t_input *in, SDL_Keycode key)
 		input_push(in, ACT_RESTART);
 	else if (key == SDLK_p)
 		input_push(in, ACT_PAUSE);
+	else if (key == SDLK_m)
+		input_push(in, ACT_MUTE);
 #ifdef __EMSCRIPTEN__
 	else if (key == SDLK_ESCAPE)
 		input_push(in, ACT_PAUSE);

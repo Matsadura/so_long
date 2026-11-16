@@ -19,6 +19,7 @@ typedef struct s_app
 	t_platform	*platform;
 	t_game		game;
 	t_renderer	renderer;
+	t_sound_bank	sounds;
 	char		**custom_levels;
 	int			custom_count;
 	double		last_time;
@@ -40,6 +41,7 @@ typedef struct s_app
 #define WEB_ACTIONS     7
 #define WEB_NEW_GAME    7
 #define WEB_AUTO_PAUSE  8
+#define WEB_TOGGLE_MUTE 9
 
 static t_app	*g_app;
 
@@ -63,6 +65,17 @@ void	web_action(int action)
 		g_app->web_new_game = true;
 	else if (action == WEB_AUTO_PAUSE)
 		g_app->web_auto_pause = true;
+	else if (action == WEB_TOGGLE_MUTE)
+		input_push(&g_app->pending, ACT_MUTE);
+}
+
+/* Lets the page keep its sound button label in sync with the M key. */
+#ifdef __EMSCRIPTEN__
+EMSCRIPTEN_KEEPALIVE
+#endif
+int	web_is_muted(void)
+{
+	return (g_app != NULL && platform_is_muted(g_app->platform));
 }
 
 static void	usage(const char *prog)
@@ -74,7 +87,8 @@ static void	usage(const char *prog)
 		"  --frames N       quit after N frames (testing)\n"
 		"  --dt SECONDS     fixed simulation step per frame (testing)\n"
 		"  --keys STR       scripted input, one char per frame:\n"
-		"                   wasd hop, e enter, r retry, p pause, q quit,\n"
+		"                   wasd hop, e enter, r retry, p pause, m mute,\n"
+		"                   q quit,\n"
 		"                   . wait one frame\n",
 		prog);
 }
@@ -121,9 +135,9 @@ static void	app_shutdown(t_app *app)
 
 static void	scripted_input(t_app *app, t_input *in)
 {
-	static const char		keys[] = "wsaderp";
+	static const char		keys[] = "wsaderpm";
 	static const t_action	acts[] = {ACT_UP, ACT_DOWN, ACT_LEFT, ACT_RIGHT,
-		ACT_CONFIRM, ACT_RESTART, ACT_PAUSE};
+		ACT_CONFIRM, ACT_RESTART, ACT_PAUSE, ACT_MUTE};
 	const char				*k;
 
 	if (app->script == NULL || *app->script == '\0')
@@ -178,6 +192,24 @@ static void	apply_web_input(t_app *app, t_input *in)
 	app->web_auto_pause = false;
 }
 
+/* Mute is a presentation setting, handled here rather than in the core. */
+static void	handle_mute(t_app *app, const t_input *in)
+{
+	int		i;
+	bool	muted;
+
+	i = 0;
+	while (i < in->count)
+	{
+		if (in->actions[i++] == ACT_MUTE)
+		{
+			muted = !platform_is_muted(app->platform);
+			platform_set_muted(app->platform, muted);
+			platform_save_muted(muted);
+		}
+	}
+}
+
 /* One frame: input -> update(dt) -> render. Never blocks. */
 static void	tick(void *arg)
 {
@@ -194,9 +226,11 @@ static void	tick(void *arg)
 		dt = MAX_DT;
 	if (app->fixed_dt > 0.0)
 		dt = app->fixed_dt;
+	app->game.events = 0;
 	platform_poll_input(app->platform, &in);
 	scripted_input(app, &in);
 	apply_web_input(app, &in);
+	handle_mute(app, &in);
 	if (in.targets_reset)
 		renderer_invalidate(&app->renderer);
 	if (wants_quit(&in))
@@ -212,7 +246,10 @@ static void	tick(void *arg)
 			app->exit_code = EXIT_FAILURE;
 		}
 		else
+		{
+			sound_update(&app->sounds, app->platform, &app->game);
 			renderer_draw(&app->renderer, app->platform, &app->game);
+		}
 		if (app->game.best_score != app->saved_best)
 		{
 			app->saved_best = app->game.best_score;
@@ -296,6 +333,7 @@ static int	start(t_app *app)
 		return (fprintf(stderr, "Error: SDL: %s\n", platform_error()), 1);
 	if (!renderer_init(&app->renderer, app->platform))
 		return (1);
+	sound_init(&app->sounds, app->platform);
 	app->game.best_score = platform_load_best();
 	app->saved_best = app->game.best_score;
 	g_app = app;
