@@ -93,14 +93,64 @@
   button.primary { color: var(--bg); background: var(--yellow); border-color: var(--yellow); }
   button.primary:hover { background: var(--fg); border-color: var(--fg); }
 
-  /* On-screen controls appear on touch devices only. */
+  /* The player groups everything that goes fullscreen together: the game,
+     the touch controls and a small Pause / Sound / Exit bar. */
+  .player { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .screen { display: flex; justify-content: center; max-width: 100%; }
+  .fs-bar { display: none; gap: 8px; }
+  .fs-bar button { padding: 8px 10px; font-size: 10px; }
+
+  /* On-screen controls appear on touch devices only (html.has-touch, set by JS). */
   .touch { display: none; width: 100%; max-width: 420px; justify-content: space-between; align-items: center; gap: 16px; }
+  html.has-touch .touch { display: flex; }
   .dpad { display: grid; grid-template-columns: repeat(3, 64px); grid-template-rows: repeat(3, 64px); gap: 6px; }
   .dpad button { padding: 0; font-size: 18px; }
   .dpad .up { grid-area: 1 / 2; } .dpad .left { grid-area: 2 / 1; }
   .dpad .right { grid-area: 2 / 3; } .dpad .down { grid-area: 3 / 2; }
   .touch .ok { width: 96px; height: 96px; font-size: 14px; }
-  @media (pointer: coarse) { .touch { display: flex; } }
+
+  /* ---- Fullscreen: native (Fullscreen API) or the CSS fallback used where
+     the API is missing (iPhone Safari). JS sets .fs on the player. ---- */
+  html.fs-lock, html.fs-lock body { overflow: hidden; }
+  .player.fs {
+    position: fixed; inset: 0; z-index: 100;
+    width: 100vw; height: 100vh; height: 100dvh; max-width: none;
+    margin: 0; background: var(--bg);
+    display: grid; gap: 10px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas: "bar" "screen" "touch";
+    padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right))
+             max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+    touch-action: none;
+    -webkit-user-select: none; user-select: none;
+  }
+  .player.fs .fs-bar { display: flex; grid-area: bar; justify-content: flex-end; }
+  .player.fs .screen { grid-area: screen; width: 100%; height: 100%; min-width: 0; min-height: 0; }
+  .player.fs .stage { width: 100%; height: 100%; border: 0; box-shadow: none; }
+  .player.fs canvas#canvas {
+    width: 100% !important; height: 100% !important;
+    max-width: none; max-height: none; object-fit: contain;
+  }
+  .player.fs .touch { grid-area: touch; justify-self: center; }
+
+  /* Phone held sideways: D-pad | game | buttons + OK. */
+  @media (orientation: landscape) {
+    html.has-touch .player.fs {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-rows: auto minmax(0, 1fr);
+      grid-template-areas: "dpad screen bar" "dpad screen ok";
+      column-gap: 14px;
+    }
+    html.has-touch .player.fs .touch { display: contents; }
+    html.has-touch .player.fs .dpad { grid-area: dpad; align-self: center; }
+    html.has-touch .player.fs .ok { grid-area: ok; align-self: center; justify-self: center; }
+    html.has-touch .player.fs .fs-bar { flex-direction: column; align-items: stretch; }
+  }
+  @media (orientation: landscape) and (max-height: 500px) {
+    html.has-touch .player.fs .dpad { grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(3, 52px); }
+    html.has-touch .player.fs .ok { width: 76px; height: 76px; }
+  }
 
   .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; }
   .panel { border: var(--px) solid var(--faint); padding: 16px 18px; }
@@ -136,11 +186,29 @@
   </header>
 
   <main>
-    <div class="stage">
-      <canvas id="canvas" tabindex="0" aria-label="Game screen" oncontextmenu="event.preventDefault()"></canvas>
-      <div id="loader" role="status" aria-live="polite">
-        <div id="status">LOADING...</div>
-        <div class="bar"><div id="progress"></div></div>
+    <div class="player" id="player">
+      <div class="fs-bar" aria-label="Fullscreen controls">
+        <button data-action="6">Pause</button>
+        <button class="sound-btn" aria-pressed="true">Sound: on</button>
+        <button class="fs-toggle">Exit</button>
+      </div>
+      <div class="screen">
+        <div class="stage">
+          <canvas id="canvas" tabindex="0" aria-label="Game screen" oncontextmenu="event.preventDefault()"></canvas>
+          <div id="loader" role="status" aria-live="polite">
+            <div id="status">LOADING...</div>
+            <div class="bar"><div id="progress"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="touch" aria-label="Touch controls">
+        <div class="dpad">
+          <button class="up" data-hold="0" aria-label="Hop up">&#9650;</button>
+          <button class="left" data-hold="2" aria-label="Hop left">&#9664;</button>
+          <button class="right" data-hold="3" aria-label="Hop right">&#9654;</button>
+          <button class="down" data-hold="1" aria-label="Hop down">&#9660;</button>
+        </div>
+        <button class="ok primary" data-hold="4">OK</button>
       </div>
     </div>
 
@@ -148,18 +216,8 @@
       <button class="primary" data-action="7">New game</button>
       <button data-action="6">Pause</button>
       <button data-action="5">Retry stage</button>
-      <button id="sound" aria-pressed="true">Sound: on</button>
-      <button id="fullscreen">Fullscreen</button>
-    </div>
-
-    <div class="touch" aria-label="Touch controls">
-      <div class="dpad">
-        <button class="up" data-hold="0" aria-label="Hop up">&#9650;</button>
-        <button class="left" data-hold="2" aria-label="Hop left">&#9664;</button>
-        <button class="right" data-hold="3" aria-label="Hop right">&#9654;</button>
-        <button class="down" data-hold="1" aria-label="Hop down">&#9660;</button>
-      </div>
-      <button class="ok primary" data-hold="4">OK</button>
+      <button class="sound-btn" aria-pressed="true">Sound: on</button>
+      <button class="fs-toggle">Fullscreen</button>
     </div>
 
     <div class="panels">
@@ -248,18 +306,22 @@
     });
   });
 
-  // Sound button mirrors the game's mute state (also toggled with M).
-  var soundBtn = document.getElementById("sound");
+  // Sound buttons mirror the game's mute state (also toggled with M).
+  var soundBtns = document.querySelectorAll(".sound-btn");
   function syncSound() {
     if (typeof Module._web_is_muted !== "function") return;
     var muted = Module._web_is_muted() !== 0;
-    soundBtn.textContent = muted ? "Sound: off" : "Sound: on";
-    soundBtn.setAttribute("aria-pressed", muted ? "false" : "true");
+    soundBtns.forEach(function (b) {
+      b.textContent = muted ? "Sound: off" : "Sound: on";
+      b.setAttribute("aria-pressed", muted ? "false" : "true");
+    });
   }
-  soundBtn.addEventListener("click", function () {
-    act(ACTION_TOGGLE_MUTE);
-    setTimeout(syncSound, 60);
-    canvas.focus();
+  soundBtns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      act(ACTION_TOGGLE_MUTE);
+      setTimeout(syncSound, 60);
+      canvas.focus();
+    });
   });
   window.addEventListener("keyup", function (e) {
     if (e.key === "m" || e.key === "M") setTimeout(syncSound, 60);
@@ -276,10 +338,73 @@
     window.addEventListener(type, unlockAudio, true);
   });
 
-  document.getElementById("fullscreen").addEventListener("click", function () {
-    var el = document.querySelector(".stage");
-    if (el.requestFullscreen) el.requestFullscreen().catch(function () {});
+  // Touch devices get the on-screen D-pad (also when a touch arrives later).
+  var root = document.documentElement;
+  if ((window.matchMedia && matchMedia("(pointer: coarse)").matches)
+      || navigator.maxTouchPoints > 0) root.classList.add("has-touch");
+  window.addEventListener("touchstart", function () { root.classList.add("has-touch"); },
+    { once: true, passive: true });
+
+  // Fullscreen: the whole player (game + touch controls) goes fullscreen.
+  // Uses the Fullscreen API (prefixed on older Safari); where it is missing
+  // or refused (iPhone Safari), a fixed full-viewport layout stands in.
+  var player = document.getElementById("player");
+  var fsButtons = document.querySelectorAll(".fs-toggle");
+  function nativeFsElement() {
+    return document.fullscreenElement || document.webkitFullscreenElement || null;
+  }
+  function inFullscreen() {
+    return nativeFsElement() === player || player.classList.contains("pseudo-fs");
+  }
+  function syncFullscreen() {
+    var on = inFullscreen();
+    player.classList.toggle("fs", on);
+    root.classList.toggle("fs-lock", on);
+    fsButtons.forEach(function (b) {
+      b.textContent = on ? "Exit" : "Fullscreen";
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
     canvas.focus();
+  }
+  function enterPseudoFullscreen() {
+    player.classList.add("pseudo-fs");
+    window.scrollTo(0, 0);
+    syncFullscreen();
+  }
+  function enterFullscreen() {
+    var request = player.requestFullscreen || player.webkitRequestFullscreen;
+    if (!request) return enterPseudoFullscreen();
+    try {
+      var result = request.call(player, { navigationUI: "hide" });
+      if (result && typeof result.then === "function")
+        result.catch(enterPseudoFullscreen);
+    } catch (e) {
+      enterPseudoFullscreen();
+    }
+  }
+  function exitFullscreen() {
+    if (player.classList.contains("pseudo-fs")) {
+      player.classList.remove("pseudo-fs");
+      syncFullscreen();
+      return;
+    }
+    var exit = document.exitFullscreen || document.webkitExitFullscreen;
+    if (exit && nativeFsElement()) {
+      var result = exit.call(document);
+      if (result && typeof result.catch === "function") result.catch(function () {});
+    }
+  }
+  fsButtons.forEach(function (b) {
+    b.addEventListener("click", function () {
+      if (inFullscreen()) exitFullscreen();
+      else enterFullscreen();
+    });
+  });
+  document.addEventListener("fullscreenchange", syncFullscreen);
+  document.addEventListener("webkitfullscreenchange", syncFullscreen);
+  // Esc leaves the CSS fallback too (native fullscreen handles Esc itself).
+  window.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && player.classList.contains("pseudo-fs")) exitFullscreen();
   });
 
   // Keep arrow keys / space from scrolling the page.
