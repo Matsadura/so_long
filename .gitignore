@@ -6,3 +6,5 @@ build/
 web/index.js
 web/index.wasm
 web/index.data
+.playwright-mcp/
+web/index.html

@@ -52,6 +52,11 @@ bool		platform_locate_assets(void);
 void		platform_poll_input(t_platform *p, t_input *in);
 void		input_push(t_input *in, t_action action);
 
+/* Best score persistence: localStorage in the browser; natively the value
+** only lives for the session (load returns 0, save is a no-op). */
+int			platform_load_best(void);
+void		platform_save_best(int score);
+
 double		platform_time_seconds(void);
 /* Native-only frame cap when vsync is unavailable; no-op in the browser. */
 void		platform_limit_fps(t_platform *p, double frame_start, int max_fps);

@@ -11,6 +11,29 @@
 
 #define MAX_TEXTURES 64
 
+#ifdef __EMSCRIPTEN__
+/* Native windows are resizable; in the browser the canvas keeps the
+** logical size and the page scales it with CSS. */
+# define WINDOW_FLAGS 0
+
+EM_JS(int, js_load_best, (void), {
+	try {
+		var v = window.localStorage.getItem("so_long.best");
+		return v === null ? 0 : (parseInt(v, 10) | 0);
+	} catch (e) {
+		return 0;
+	}
+});
+
+EM_JS(void, js_save_best, (int score), {
+	try {
+		window.localStorage.setItem("so_long.best", String(score));
+	} catch (e) {}
+});
+#else
+# define WINDOW_FLAGS (SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)
+#endif
+
 struct s_platform
 {
 	SDL_Window		*window;
@@ -33,7 +56,7 @@ static bool	create_window(t_platform *p, const char *title)
 
 	p->window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED,
 			SDL_WINDOWPOS_CENTERED, p->logical_w, p->logical_h,
-			SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+			WINDOW_FLAGS);
 	if (p->window == NULL)
 		return (false);
 	p->renderer = SDL_CreateRenderer(p->window, -1,
@@ -143,6 +166,24 @@ bool	platform_locate_assets(void)
 	ok = (chdir(base) == 0 && access("assets/sprites", R_OK) == 0);
 	SDL_free(base);
 	return (ok);
+#endif
+}
+
+int	platform_load_best(void)
+{
+#ifdef __EMSCRIPTEN__
+	return (js_load_best());
+#else
+	return (0);
+#endif
+}
+
+void	platform_save_best(int score)
+{
+#ifdef __EMSCRIPTEN__
+	js_save_best(score);
+#else
+	(void)score;
 #endif
 }
 

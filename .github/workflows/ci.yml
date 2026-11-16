@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install SDL2 and Valgrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsdl2-dev libsdl2-image-dev valgrind
+      - name: Build (-Wall -Wextra -Werror)
+        run: make
+      - name: Tests
+        run: make test
+      - name: Tests under Valgrind
+        run: VALGRIND=1 ./tests/run_tests.sh

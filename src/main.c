@@ -29,7 +29,41 @@ typedef struct s_app
 	long		frames;
 	const char	*script;
 	double		fixed_dt;
+	int			saved_best;
+	/* Browser glue: actions queued from HTML buttons / touch controls. */
+	t_input		pending;
+	bool		web_new_game;
+	bool		web_auto_pause;
 }	t_app;
+
+/* web_action() codes, mirrored in web/shell.html */
+#define WEB_ACTIONS     7
+#define WEB_NEW_GAME    7
+#define WEB_AUTO_PAUSE  8
+
+static t_app	*g_app;
+
+/*
+** Called from JavaScript (Module._web_action). Queues an action that the
+** next tick applies, so the browser never re-enters the game mid-frame.
+*/
+#ifdef __EMSCRIPTEN__
+EMSCRIPTEN_KEEPALIVE
+#endif
+void	web_action(int action)
+{
+	static const t_action	map[WEB_ACTIONS] = {ACT_UP, ACT_DOWN, ACT_LEFT,
+		ACT_RIGHT, ACT_CONFIRM, ACT_RESTART, ACT_PAUSE};
+
+	if (g_app == NULL)
+		return ;
+	if (action >= 0 && action < WEB_ACTIONS)
+		input_push(&g_app->pending, map[action]);
+	else if (action == WEB_NEW_GAME)
+		g_app->web_new_game = true;
+	else if (action == WEB_AUTO_PAUSE)
+		g_app->web_auto_pause = true;
+}
 
 static void	usage(const char *prog)
 {
@@ -73,6 +107,7 @@ static void	app_shutdown(t_app *app)
 {
 	int	i;
 
+	g_app = NULL;
 	game_free(&app->game);
 	platform_destroy(app->platform);
 	app->platform = NULL;
@@ -114,6 +149,7 @@ static bool	wants_quit(const t_input *in)
 	return (false);
 }
 
+#ifndef __EMSCRIPTEN__
 static void	print_status(const t_game *g)
 {
 	static const char	*names[] = {"TITLE", "PLAYING", "PAUSED", "DYING",
@@ -123,6 +159,23 @@ static void	print_status(const t_game *g)
 		"coins=%d/%d goals=%d/%d\n", g->level_index + 1, names[g->state],
 		g->lives, g->score, g->moves, g->collected, g->map.collectibles,
 		g->goals_filled, g->map.goals);
+}
+#endif
+
+static void	apply_web_input(t_app *app, t_input *in)
+{
+	int	i;
+
+	i = 0;
+	while (i < app->pending.count)
+		input_push(in, app->pending.actions[i++]);
+	app->pending.count = 0;
+	if (app->web_new_game)
+		game_new_run(&app->game);
+	if (app->web_auto_pause && app->game.state == GAME_PLAYING)
+		app->game.state = GAME_PAUSED;
+	app->web_new_game = false;
+	app->web_auto_pause = false;
 }
 
 /* One frame: input -> update(dt) -> render. Never blocks. */
@@ -143,6 +196,7 @@ static void	tick(void *arg)
 		dt = app->fixed_dt;
 	platform_poll_input(app->platform, &in);
 	scripted_input(app, &in);
+	apply_web_input(app, &in);
 	if (in.targets_reset)
 		renderer_invalidate(&app->renderer);
 	if (wants_quit(&in))
@@ -159,6 +213,11 @@ static void	tick(void *arg)
 		}
 		else
 			renderer_draw(&app->renderer, app->platform, &app->game);
+		if (app->game.best_score != app->saved_best)
+		{
+			app->saved_best = app->game.best_score;
+			platform_save_best(app->saved_best);
+		}
 	}
 	if (app->frame_limit > 0 && ++app->frames >= app->frame_limit)
 		app->running = false;
@@ -232,11 +291,14 @@ static int	start(t_app *app)
 		return (fprintf(stderr, "Error: %s: %s\n",
 				app->game.levels[0], map_error_str(err)), 1);
 	renderer_view_size(&app->game, &w, &h);
-	app->platform = platform_create("so_long", w, h);
+	app->platform = platform_create("So Long: Street-Crossing Arcade", w, h);
 	if (app->platform == NULL)
 		return (fprintf(stderr, "Error: SDL: %s\n", platform_error()), 1);
 	if (!renderer_init(&app->renderer, app->platform))
 		return (1);
+	app->game.best_score = platform_load_best();
+	app->saved_best = app->game.best_score;
+	g_app = app;
 	return (0);
 }
 

@@ -48,8 +48,13 @@ static void	title_screen(t_platform *p, const t_renderer *r, const t_game *g)
 	gap(&s, 22);
 	line(&s, blink(g) ? "PRESS ENTER TO START" : "", 4, COLOR_TEXT);
 	gap(&s, 22);
+#ifdef __EMSCRIPTEN__
+	line(&s, "ARROWS / WASD  HOP     P / ESC  PAUSE", 2, COLOR_TEXT);
+	line(&s, "R  RETRY STAGE     ENTER  CONTINUE", 2, COLOR_TEXT);
+#else
 	line(&s, "ARROWS / WASD  HOP     P  PAUSE", 2, COLOR_TEXT);
 	line(&s, "R  RETRY STAGE     ESC  QUIT", 2, COLOR_TEXT);
+#endif
 	gap(&s, 10);
 	line(&s, "DODGE TRAFFIC, RIDE THE LOGS, FILL EVERY GOAL", 2,
 		COLOR_MUTED);

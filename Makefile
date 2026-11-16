@@ -43,6 +43,25 @@ $(BUILD_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(SDL_CFLAGS) -MMD -MP -c $< -o $@
 
+# --- WebAssembly (requires emsdk_env.sh sourced) -------------------------
+EMCC        ?= emcc
+WEB_DIR     := web
+WEB_OUT     := $(WEB_DIR)/index.html
+WEB_SHELL   := $(WEB_DIR)/shell.html
+WASM_FLAGS  := -Wall -Wextra -Werror -std=c11 -D_DEFAULT_SOURCE -Iincludes -O2 \
+               -sUSE_SDL=2 -sUSE_SDL_IMAGE=2 -sSDL2_IMAGE_FORMATS='["png"]' \
+               -sALLOW_MEMORY_GROWTH=1 -sENVIRONMENT=web \
+               -sEXPORTED_FUNCTIONS='["_main","_web_action"]' \
+               -sEXPORTED_RUNTIME_METHODS='["ccall"]' \
+               --preload-file assets/sprites --preload-file assets/maps \
+               --shell-file $(WEB_SHELL)
+
+wasm: $(WEB_OUT)
+
+$(WEB_OUT): $(SRC) $(wildcard includes/*.h) $(WEB_SHELL) \
+            $(wildcard assets/sprites/*.png) $(wildcard assets/maps/*.ber)
+	$(EMCC) $(WASM_FLAGS) $(SRC) -o $@
+
 test: $(NAME)
 	./tests/run_tests.sh
 
@@ -50,11 +69,12 @@ clean:
 	rm -rf build
 
 fclean: clean
-	rm -f $(NAME)
+	rm -f $(NAME) $(WEB_DIR)/index.html $(WEB_DIR)/index.js \
+		$(WEB_DIR)/index.wasm $(WEB_DIR)/index.data
 
 re: fclean
 	$(MAKE) all
 
 -include $(DEP)
 
-.PHONY: all test clean fclean re
+.PHONY: all wasm test clean fclean re
