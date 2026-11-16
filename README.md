@@ -101,7 +101,11 @@ CI runs the whole suite under Valgrind.
 
 ## Deployment
 
-**GitHub Pages:** [`.github/workflows/pages.yml`](.github/workflows/pages.yml) builds with Emscripten and publishes `web/` on every push to `main`. Turn it on once under *Settings → Pages → Source: GitHub Actions*.
+**GitHub Pages:** [`.github/workflows/pages.yml`](.github/workflows/pages.yml) builds with Emscripten and publishes only the game files (`index.{html,js,wasm,data}`). It runs on every push to `main` or `refactor/arcade-wasm`, and can be started by hand from the Actions tab. One-time setup:
+
+1. *Settings → Pages → Build and deployment → Source:* choose **GitHub Actions**, not "Deploy from a branch". Deploying from a branch makes GitHub render this README with Jekyll instead of serving the game.
+2. *Settings → Environments → github-pages → Deployment branches and tags:* add `refactor/arcade-wasm` if you deploy from that branch. By default only the default branch may deploy.
+3. Push, or run the workflow from the Actions tab. The game is then live at `https://matsadura.github.io/so_long/`.
 
 **Vercel / any static host:** run `make wasm` and deploy the four files `web/index.{html,js,wasm,data}`, for example `npx vercel deploy web --prod`. The host must serve `.wasm` as `application/wasm`; GitHub Pages and Vercel both do.
 

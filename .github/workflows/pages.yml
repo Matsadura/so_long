@@ -1,8 +1,11 @@
 name: Deploy web build to GitHub Pages
 
+# Publishes the WebAssembly build (not the README). Requires
+# Settings -> Pages -> Source: "GitHub Actions", and every branch listed
+# here must be allowed under Settings -> Environments -> github-pages.
 on:
   push:
-    branches: [main]
+    branches: [main, refactor/arcade-wasm]
   workflow_dispatch:
 
 permissions:
@@ -18,7 +21,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: mymindstorm/setup-emsdk@v14
         with:
           version: 7.0.0
