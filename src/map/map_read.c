@@ -5,8 +5,6 @@
 #include <string.h>
 #include <unistd.h>
 
-static t_map_error	map_extract_entities(t_map *map);
-
 /* "dir/name.ber" -> true; ".ber", "x.ber.txt", "a.b" -> false. */
 static bool	has_ber_extension(const char *path)
 {
@@ -145,23 +143,32 @@ t_map_error	map_parse(const char *text, int len, t_map *out)
 	if (err != MAP_OK)
 		return (err);
 	out->tiles = malloc((size_t)cols * rows);
-	if (out->tiles == NULL)
-		return (MAP_ERR_ALLOC);
+	out->lanes = calloc(rows, sizeof(t_lane));
 	out->cols = cols;
 	out->rows = rows;
-	copy_rows(text, out->tiles, cols, rows);
-	err = map_validate_layout(out->tiles, cols, rows);
+	if (out->tiles == NULL || out->lanes == NULL)
+		err = MAP_ERR_ALLOC;
+	else
+	{
+		copy_rows(text, out->tiles, cols, rows);
+		err = map_check_chars(out->tiles, cols, rows);
+	}
 	if (err == MAP_OK)
-		err = map_extract_entities(out);
+		err = map_build_lanes(out);
 	if (err == MAP_OK)
+		err = map_validate_layout(out);
+	if (err == MAP_OK)
+	{
+		map_extract_entities(out);
 		err = map_check_reachability(out);
+	}
 	if (err != MAP_OK)
 		map_free(out);
 	return (err);
 }
 
-/* Records player/enemy/exit positions and turns P/N tiles into floor. */
-static t_map_error	map_extract_entities(t_map *map)
+/* Records entity positions and counts, turning P/N tiles into floor. */
+void	map_extract_entities(t_map *map)
 {
 	int		i;
 	char	*t;
@@ -173,7 +180,7 @@ static t_map_error	map_extract_entities(t_map *map)
 		if (*t == TILE_PLAYER)
 			map->player_start = (t_point){i % map->cols, i / map->cols};
 		else if (*t == TILE_EXIT)
-			map->exit = (t_point){i % map->cols, i / map->cols};
+			map->goals++;
 		else if (*t == TILE_COLLECTIBLE)
 			map->collectibles++;
 		else if (*t == TILE_ENEMY)
@@ -183,12 +190,12 @@ static t_map_error	map_extract_entities(t_map *map)
 			*t = TILE_FLOOR;
 		i++;
 	}
-	return (MAP_OK);
 }
 
 void	map_free(t_map *map)
 {
 	free(map->tiles);
+	free(map->lanes);
 	memset(map, 0, sizeof(*map));
 }
 
@@ -214,12 +221,18 @@ const char	*map_error_str(t_map_error err)
 	[MAP_ERR_TOO_SMALL] = "map is too small (min 3x3)",
 	[MAP_ERR_INVALID_CHAR] = "map contains invalid characters",
 	[MAP_ERR_NOT_CLOSED] = "map is not surrounded by walls",
+	[MAP_ERR_LANE_CONTENT] = "lane rows must be only road (R X C) "
+		"or only river (W L)",
+	[MAP_ERR_LANE_SPEED] = "lane speed digits (2-9) belong on one edge "
+		"of a lane row",
+	[MAP_ERR_RIVER_NO_LOG] = "every river lane needs at least one log (L)",
 	[MAP_ERR_PLAYER_COUNT] = "map must contain exactly one player (P)",
 	[MAP_ERR_EXIT_COUNT] = "map must contain exactly one exit (E)",
+	[MAP_ERR_GOAL_COUNT] = "lane maps need 1 to 16 goal slots (E)",
 	[MAP_ERR_NO_COLLECTIBLE] = "map must contain at least one collectible (C)",
 	[MAP_ERR_TOO_MANY_ENEMIES] = "map contains too many enemies (max 128)",
 	[MAP_ERR_UNREACHABLE_COLLECTIBLE] = "not all collectibles are reachable",
-	[MAP_ERR_UNREACHABLE_EXIT] = "exit is not reachable",
+	[MAP_ERR_UNREACHABLE_EXIT] = "an exit / goal slot is not reachable",
 	[MAP_ERR_ALLOC] = "out of memory",
 	};
 

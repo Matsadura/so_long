@@ -2,11 +2,27 @@
 
 #include <string.h>
 
-static bool	is_valid_tile(char c)
+static bool	is_digit_speed(char c)
 {
-	return (c != '\0' && strchr("01CEPN", c) != NULL);
+	return (c >= '2' && c <= '9');
 }
 
+t_map_error	map_check_chars(const char *tiles, int cols, int rows)
+{
+	int	i;
+
+	i = 0;
+	while (i < cols * rows)
+	{
+		if (tiles[i] == '\0' || (strchr("01CEPNRXWL", tiles[i]) == NULL
+				&& !is_digit_speed(tiles[i])))
+			return (MAP_ERR_INVALID_CHAR);
+		i++;
+	}
+	return (MAP_OK);
+}
+
+/* Runs after map_build_lanes(), so speed digits are already walls. */
 static bool	is_closed(const char *tiles, int cols, int rows)
 {
 	int	x;
@@ -30,39 +46,35 @@ static bool	is_closed(const char *tiles, int cols, int rows)
 	return (true);
 }
 
-/* Character set, closed perimeter and element counts. */
-t_map_error	map_validate_layout(const char *tiles, int cols, int rows)
+static int	count_tile(const t_map *map, char c)
 {
 	int	i;
-	int	players;
-	int	exits;
-	int	collectibles;
-	int	enemies;
+	int	n;
 
-	players = 0;
-	exits = 0;
-	collectibles = 0;
-	enemies = 0;
+	n = 0;
 	i = 0;
-	while (i < cols * rows)
-	{
-		if (!is_valid_tile(tiles[i]))
-			return (MAP_ERR_INVALID_CHAR);
-		players += (tiles[i] == TILE_PLAYER);
-		exits += (tiles[i] == TILE_EXIT);
-		collectibles += (tiles[i] == TILE_COLLECTIBLE);
-		enemies += (tiles[i] == TILE_ENEMY);
-		i++;
-	}
-	if (!is_closed(tiles, cols, rows))
+	while (i < map->cols * map->rows)
+		n += (map->tiles[i++] == c);
+	return (n);
+}
+
+/* Closed perimeter and element counts (rules depend on the map mode). */
+t_map_error	map_validate_layout(const t_map *map)
+{
+	int	exits;
+
+	if (!is_closed(map->tiles, map->cols, map->rows))
 		return (MAP_ERR_NOT_CLOSED);
-	if (players != 1)
+	if (count_tile(map, TILE_PLAYER) != 1)
 		return (MAP_ERR_PLAYER_COUNT);
-	if (exits != 1)
+	exits = count_tile(map, TILE_EXIT);
+	if (!map->has_lanes && exits != 1)
 		return (MAP_ERR_EXIT_COUNT);
-	if (collectibles < 1)
+	if (map->has_lanes && (exits < 1 || exits > MAP_MAX_GOALS))
+		return (MAP_ERR_GOAL_COUNT);
+	if (!map->has_lanes && count_tile(map, TILE_COLLECTIBLE) < 1)
 		return (MAP_ERR_NO_COLLECTIBLE);
-	if (enemies > MAP_MAX_ENEMIES)
+	if (count_tile(map, TILE_ENEMY) > MAP_MAX_ENEMIES)
 		return (MAP_ERR_TOO_MANY_ENEMIES);
 	return (MAP_OK);
 }

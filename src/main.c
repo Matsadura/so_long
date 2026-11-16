@@ -40,7 +40,8 @@ static void	usage(const char *prog)
 		"  --frames N       quit after N frames (testing)\n"
 		"  --dt SECONDS     fixed simulation step per frame (testing)\n"
 		"  --keys STR       scripted input, one char per frame:\n"
-		"                   wasd move, e enter, r restart, q quit, . wait\n",
+		"                   wasd hop, e enter, r retry, p pause, q quit,\n"
+		"                   . wait one frame\n",
 		prog);
 }
 
@@ -85,9 +86,9 @@ static void	app_shutdown(t_app *app)
 
 static void	scripted_input(t_app *app, t_input *in)
 {
-	static const char		keys[] = "wsader";
+	static const char		keys[] = "wsaderp";
 	static const t_action	acts[] = {ACT_UP, ACT_DOWN, ACT_LEFT, ACT_RIGHT,
-		ACT_CONFIRM, ACT_RESTART};
+		ACT_CONFIRM, ACT_RESTART, ACT_PAUSE};
 	const char				*k;
 
 	if (app->script == NULL || *app->script == '\0')
@@ -111,6 +112,17 @@ static bool	wants_quit(const t_input *in)
 		if (in->actions[i++] == ACT_QUIT)
 			return (true);
 	return (false);
+}
+
+static void	print_status(const t_game *g)
+{
+	static const char	*names[] = {"TITLE", "PLAYING", "PAUSED", "DYING",
+		"STAGE_CLEAR", "GAME_OVER", "VICTORY", "FATAL"};
+
+	printf("[status] level=%d state=%s lives=%d score=%d moves=%d "
+		"coins=%d/%d goals=%d/%d\n", g->level_index + 1, names[g->state],
+		g->lives, g->score, g->moves, g->collected, g->map.collectibles,
+		g->goals_filled, g->map.goals);
 }
 
 /* One frame: input -> update(dt) -> render. Never blocks. */
@@ -256,11 +268,7 @@ int	main(int ac, char **av)
 		platform_limit_fps(app.platform, frame_start, NATIVE_FPS);
 	}
 	if (app.script != NULL || app.frame_limit > 0)
-		printf("[status] level=%d state=%s moves=%d coins=%d/%d\n",
-			app.game.level_index + 1, (const char *[]){"PLAYING",
-			"LEVEL_CLEAR", "COMPLETE", "GAME_OVER", "FATAL"}[app.game.state],
-			app.game.moves,
-			app.game.collected, app.game.map.collectibles);
+		print_status(&app.game);
 	app_shutdown(&app);
 #endif
 	return (app.exit_code);

@@ -136,3 +136,11 @@ void	draw_text_centered(t_platform *p, const char *s, int cx, int y,
 {
 	draw_text(p, s, cx - text_width(s, scale) / 2, y, scale, rgba);
 }
+
+/* Largest scale <= preferred at which the text fits in max_w pixels. */
+int	text_fit_scale(const char *s, int max_w, int preferred)
+{
+	while (preferred > 1 && text_width(s, preferred) > max_w)
+		preferred--;
+	return (preferred);
+}

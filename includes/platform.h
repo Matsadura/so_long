@@ -24,6 +24,7 @@ typedef enum e_action
 	ACT_RIGHT,
 	ACT_CONFIRM,
 	ACT_RESTART,
+	ACT_PAUSE,
 	ACT_QUIT
 }	t_action;
 
@@ -63,6 +64,12 @@ bool		platform_set_layer(t_platform *p, t_tex tex);
 
 void		platform_clear(t_platform *p, uint32_t rgba);
 void		platform_draw(t_platform *p, t_tex tex, int x, int y, int w, int h);
+/* Color-modulated (tint 0xRRGGBBAA, white = unchanged), optionally
+** mirrored horizontally. */
+void		platform_draw_ex(t_platform *p, t_tex tex, const int rect[4],
+				uint32_t tint, bool flip_h);
+void		platform_set_clip(t_platform *p, int x, int y, int w, int h);
+void		platform_clear_clip(t_platform *p);
 void		platform_fill_rect(t_platform *p, int x, int y, int w, int h,
 				uint32_t rgba);
 void		platform_present(t_platform *p);

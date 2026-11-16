@@ -5,8 +5,9 @@
 /*
 ** Iterative flood fill (explicit stack) from the player start. Recursion
 ** depth would otherwise reach rows*cols, which is unsafe on the small
-** WebAssembly stack. Walls block; enemies patrol so their tiles count as
-** walkable (they are already '0' after entity extraction).
+** WebAssembly stack. Only walls block: enemies patrol, traffic and logs
+** move, so every non-wall tile is eventually crossable. Every coin and
+** every exit / goal slot must be reachable.
 */
 t_map_error	map_check_reachability(const t_map *map)
 {
@@ -20,7 +21,7 @@ t_map_error	map_check_reachability(const t_map *map)
 	int					nx;
 	int					ny;
 	int					found_c;
-	bool				found_e;
+	int					found_e;
 
 	seen = calloc((size_t)map->cols * map->rows, 1);
 	stack = malloc(sizeof(int) * (size_t)map->cols * map->rows);
@@ -31,7 +32,7 @@ t_map_error	map_check_reachability(const t_map *map)
 		return (MAP_ERR_ALLOC);
 	}
 	found_c = 0;
-	found_e = false;
+	found_e = 0;
 	top = 0;
 	cur = map->player_start.y * map->cols + map->player_start.x;
 	seen[cur] = 1;
@@ -40,7 +41,7 @@ t_map_error	map_check_reachability(const t_map *map)
 	{
 		cur = stack[--top];
 		found_c += (map->tiles[cur] == TILE_COLLECTIBLE);
-		found_e |= (map->tiles[cur] == TILE_EXIT);
+		found_e += (map->tiles[cur] == TILE_EXIT);
 		d = 0;
 		while (d < 4)
 		{
@@ -59,7 +60,7 @@ t_map_error	map_check_reachability(const t_map *map)
 	free(stack);
 	if (found_c != map->collectibles)
 		return (MAP_ERR_UNREACHABLE_COLLECTIBLE);
-	if (!found_e)
+	if (found_e != map->goals)
 		return (MAP_ERR_UNREACHABLE_EXIT);
 	return (MAP_OK);
 }

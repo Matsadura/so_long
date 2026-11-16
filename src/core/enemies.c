@@ -29,24 +29,22 @@ bool	enemy_at(const t_game *g, int x, int y)
 	return (false);
 }
 
-/* Horizontal patrol: turn around at walls, the exit, collectibles and
-** other enemies. Touching the player ends the attempt. */
+/* Horizontal patrol on plain floor: turn around at anything else (walls,
+** exits, coins, lanes, other enemies). Touching the player costs a life. */
 static void	step_enemy(t_game *g, t_enemy *e)
 {
-	int		nx;
-	char	t;
+	int	nx;
 
 	nx = e->pos.x + e->dir;
-	t = map_tile_at(g->tiles, g->map.cols, g->map.rows, nx, e->pos.y);
-	if (t == TILE_WALL || t == TILE_EXIT || t == TILE_COLLECTIBLE
-		|| enemy_at(g, nx, e->pos.y))
+	if (game_tile(g, nx, e->pos.y) != TILE_FLOOR || enemy_at(g, nx, e->pos.y))
 	{
 		e->dir = -e->dir;
 		return ;
 	}
 	e->pos.x = nx;
-	if (e->pos.x == g->player.x && e->pos.y == g->player.y)
-		g->state = GAME_OVER;
+	if (!g->player.hopping && e->pos.x == player_tile_x(g)
+		&& e->pos.y == (int)g->player.y)
+		player_kill(g, DEATH_ENEMY);
 }
 
 /* Fixed-interval steps driven by accumulated dt (frame-rate independent). */

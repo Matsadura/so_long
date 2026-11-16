@@ -242,14 +242,39 @@ void	platform_clear(t_platform *p, uint32_t rgba)
 	SDL_RenderClear(p->renderer);
 }
 
-void	platform_draw(t_platform *p, t_tex tex, int x, int y, int w, int h)
+void	platform_draw_ex(t_platform *p, t_tex tex, const int rect[4],
+		uint32_t tint, bool flip_h)
 {
+	SDL_Texture	*t;
 	SDL_Rect	dst;
 
 	if (tex < 0 || tex >= MAX_TEXTURES || p->textures[tex] == NULL)
 		return ;
-	dst = (SDL_Rect){x, y, w, h};
-	SDL_RenderCopy(p->renderer, p->textures[tex], NULL, &dst);
+	t = p->textures[tex];
+	dst = (SDL_Rect){rect[0], rect[1], rect[2], rect[3]};
+	SDL_SetTextureColorMod(t, (tint >> 24) & 0xFF, (tint >> 16) & 0xFF,
+		(tint >> 8) & 0xFF);
+	SDL_SetTextureAlphaMod(t, tint & 0xFF);
+	SDL_RenderCopyEx(p->renderer, t, NULL, &dst, 0.0, NULL,
+		flip_h ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
+}
+
+void	platform_draw(t_platform *p, t_tex tex, int x, int y, int w, int h)
+{
+	platform_draw_ex(p, tex, (const int [4]){x, y, w, h}, 0xFFFFFFFFu, false);
+}
+
+void	platform_set_clip(t_platform *p, int x, int y, int w, int h)
+{
+	SDL_Rect	r;
+
+	r = (SDL_Rect){x, y, w, h};
+	SDL_RenderSetClipRect(p->renderer, &r);
+}
+
+void	platform_clear_clip(t_platform *p)
+{
+	SDL_RenderSetClipRect(p->renderer, NULL);
 }
 
 void	platform_fill_rect(t_platform *p, int x, int y, int w, int h,
