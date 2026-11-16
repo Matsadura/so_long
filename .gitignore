@@ -2,3 +2,7 @@ a.out
 tmp
 so_long
 .vscode
+build/
+web/index.js
+web/index.wasm
+web/index.data
