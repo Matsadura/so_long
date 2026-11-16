@@ -100,6 +100,13 @@ play "enemy idle at 2.0s @60Hz"       "state=PLAYING" --keys "e" --dt 0.016666 -
 play "enemy idle at 2.0s @240Hz"      "state=PLAYING" --keys "e" --dt 0.0041666 --frames 480 $C2
 play "enemy hits at 3.5s @60Hz"       "state=DYING" --keys "e" --dt 0.016666 --frames 210 $C2
 play "enemy hits at 3.5s @240Hz"      "state=DYING" --keys "e" --dt 0.0041666 --frames 840 $C2
+# Audio (SDL dummy audio driver): every clip loads, mute toggles, and the
+# sound events of a full crossing + game over play without errors.
+out=$(run "$BIN" --dt 0.04 --keys "em" --frames 5 2>&1); rc=$?
+if [ $rc -eq 0 ] && ! grep -q "Warning: cannot load" <<<"$out"; then ok "all sounds load"
+else ko "all sounds load" "rc=$rc $(grep -m3 Warning <<<"$out")"; fi
+play "mute toggles without side effects" "state=PLAYING lives=3" --keys "emm" --frames 5
+play "every sound event plays"        "state=VICTORY" --keys "ew..w..w...p.p" --frames 25 $T/frog_cross.ber
 play "full campaign loads"            "level=1 state=PLAYING" --keys "e" --frames 3
 play "ESC/quit exits cleanly"         "level=1" --keys "eq" $C1
 

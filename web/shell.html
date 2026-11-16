@@ -148,6 +148,7 @@
       <button class="primary" data-action="7">New game</button>
       <button data-action="6">Pause</button>
       <button data-action="5">Retry stage</button>
+      <button id="sound" aria-pressed="true">Sound: on</button>
       <button id="fullscreen">Fullscreen</button>
     </div>
 
@@ -169,6 +170,7 @@
           <dt><kbd>Enter</kbd></dt><dd>Start / continue</dd>
           <dt><kbd>P</kbd><kbd>Esc</kbd></dt><dd>Pause</dd>
           <dt><kbd>R</kbd></dt><dd>Retry the stage</dd>
+          <dt><kbd>M</kbd></dt><dd>Mute / unmute</dd>
         </dl>
       </section>
       <section class="panel">
@@ -192,6 +194,7 @@
 <script>
   // Codes understood by web_action() in src/main.c.
   var ACTION_AUTO_PAUSE = 8;
+  var ACTION_TOGGLE_MUTE = 9;
   var canvas = document.getElementById("canvas");
   var loader = document.getElementById("loader");
   var statusEl = document.getElementById("status");
@@ -212,6 +215,7 @@
       statusEl.textContent = text.replace(/\(.*\)/, "").trim().toUpperCase() || "LOADING...";
     },
     onRuntimeInitialized: function () {
+      setTimeout(syncSound, 100);
       progressEl.style.width = "100%";
       loader.classList.add("hidden");
       canvas.focus();
@@ -242,6 +246,34 @@
       e.preventDefault();
       act(Number(b.dataset.hold));
     });
+  });
+
+  // Sound button mirrors the game's mute state (also toggled with M).
+  var soundBtn = document.getElementById("sound");
+  function syncSound() {
+    if (typeof Module._web_is_muted !== "function") return;
+    var muted = Module._web_is_muted() !== 0;
+    soundBtn.textContent = muted ? "Sound: off" : "Sound: on";
+    soundBtn.setAttribute("aria-pressed", muted ? "false" : "true");
+  }
+  soundBtn.addEventListener("click", function () {
+    act(ACTION_TOGGLE_MUTE);
+    setTimeout(syncSound, 60);
+    canvas.focus();
+  });
+  window.addEventListener("keyup", function (e) {
+    if (e.key === "m" || e.key === "M") setTimeout(syncSound, 60);
+  });
+
+  // Browsers keep Web Audio suspended until the player interacts with the
+  // page; resume SDL's AudioContext on the first key press, click or tap.
+  function unlockAudio() {
+    var sdl = Module.SDL2;
+    var ctx = sdl && sdl.audioContext;
+    if (ctx && ctx.state !== "running") ctx.resume();
+  }
+  ["keydown", "pointerdown", "touchend"].forEach(function (type) {
+    window.addEventListener(type, unlockAudio, true);
   });
 
   document.getElementById("fullscreen").addEventListener("click", function () {

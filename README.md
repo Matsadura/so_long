@@ -41,9 +41,10 @@ The original `so_long` maps still work with their original rules (collect everyt
 | `Enter` / `Space` | Start, continue |
 | `P` | Pause (`Esc` also pauses in the browser) |
 | `R` | Retry the stage (start a new run from the end screens) |
+| `M` | Mute / unmute (remembered in the browser) |
 | `Esc` | Quit (native) |
 
-The web page adds New game, Pause, Retry and Fullscreen buttons, and an on-screen D-pad on touch devices. The game pauses itself when the tab loses focus.
+The web page adds New game, Pause, Retry, Sound and Fullscreen buttons, and an on-screen D-pad on touch devices. The game pauses itself when the tab loses focus.
 
 <p>
   <img src="docs/title.png" width="49%" alt="Title screen">
@@ -51,6 +52,23 @@ The web page adds New game, Pause, Retry and Fullscreen buttons, and an on-scree
 </p>
 
 ---
+
+### Music & sound
+
+Everything you hear is 1-bit chiptune, made only from square waves and noise, to match the 1-bit art. It's all original: written as note data and synthesised by [`tools/gen_audio.py`](tools/gen_audio.py) using only the Python standard library.
+
+| | |
+|---|---|
+| **Title theme** | *"Sidewalk Lights"*: a gentle 8-bar loop in A minor at 112 BPM |
+| **Stage theme** | *"Crosswalk Rush"*: a 16-bar loop in C major at 150 BPM, with lead, bass, arpeggio and noise drums |
+| **Jingles** | Stage clear, game over, victory |
+| **Effects** | Hop, coin (one step higher for each combo level, x1 to x5), goal slot, *splat*, *splash*, caught, time up, start, pause |
+
+```bash
+python3 tools/gen_audio.py    # regenerates assets/sounds/*.wav
+```
+
+Playback uses a small mixer built on SDL2's audio callback: 8 effect voices plus 1 looping music voice. It needs no extra library natively or in the browser. If no audio device is available, for example in CI, the game simply runs silently. Browsers keep audio suspended until you interact with the page, so the first key press, click or tap starts it.
 
 ## Building
 
@@ -163,13 +181,15 @@ src/
   main.c       entry point, CLI, tick(), native loop and emscripten_set_main_loop_arg
   core/        pure game logic: hops, lanes, collisions, enemies, scoring, state machine
   map/         reading, validation, lane extraction, flood fill, campaign list
-  platform/    SDL2 + SDL2_image implementation of platform.h
-  ui/          world rendering, HUD, title/banner/end screens, bitmap font
+  platform/    SDL2 + SDL2_image implementation of platform.h (video, input, audio mixer)
+  ui/          world rendering, HUD, title/banner/end screens, bitmap font, sound director
 assets/
   sprites/     64x64 PNGs (16x16 pixel art, 4x scale)
+  sounds/      22 kHz mono WAVs: music (8-bit), jingles and effects (16-bit)
   maps/        campaign stages, plus classic/ for the original maps
 tools/
   gen_sprites.py   regenerates the lane sprites; --check enforces the palette
+  gen_audio.py     synthesises all music and sound effects
 web/
   shell.html   responsive page wrapped around the WebAssembly build
 tests/         fixtures and the headless test runner

@@ -521,3 +521,47 @@
    fun:SDL_CreateRenderer*
    ...
 }
+{
+   sdl_startup_sdl_openaudiodevice_leak
+   Memcheck:Leak
+   match-leak-kinds: definite,indirect,possible
+   ...
+   fun:SDL_OpenAudioDevice*
+   ...
+}
+{
+   sdl_startup_sdl_openaudiodevice_cond
+   Memcheck:Cond
+   ...
+   fun:SDL_OpenAudioDevice*
+   ...
+}
+{
+   sdl_startup_sdl_openaudiodevice_value8
+   Memcheck:Value8
+   ...
+   fun:SDL_OpenAudioDevice*
+   ...
+}
+{
+   sdl_startup_sdl_openaudiodevice_addr8
+   Memcheck:Addr8
+   ...
+   fun:SDL_OpenAudioDevice*
+   ...
+}
+{
+   sdl_startup_sdl_openaudiodevice_addr4
+   Memcheck:Addr4
+   ...
+   fun:SDL_OpenAudioDevice*
+   ...
+}
+{
+   sdl_startup_sdl_openaudiodevice_param
+   Memcheck:Param
+   *
+   ...
+   fun:SDL_OpenAudioDevice*
+   ...
+}
