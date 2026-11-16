@@ -13,14 +13,24 @@ fail=0
 run() {
 	if [ "${VALGRIND:-0}" = 1 ]; then
 		valgrind -q --leak-check=full --errors-for-leak-kinds=definite,indirect \
-			--track-fds=yes --error-exitcode=99 "$@"
+			--track-fds=yes --error-exitcode=99 --num-callers=40 \
+			--suppressions=tests/valgrind.supp --gen-suppressions=all "$@"
 	else
 		"$@"
 	fi
 }
 
 ok()   { pass=$((pass + 1)); printf '  \033[32mPASS\033[0m %s\n' "$1"; }
-ko()   { fail=$((fail + 1)); printf '  \033[31mFAIL\033[0m %s\n' "$1"; [ -n "${2:-}" ] && printf '       %s\n' "$2"; }
+ko()   {
+	fail=$((fail + 1))
+	printf '  \033[31mFAIL\033[0m %s\n' "$1"
+	[ -n "${2:-}" ] && printf '       %s\n' "$2"
+	# Under valgrind, show the whole report (and generated suppressions).
+	if [ "${VALGRIND:-0}" = 1 ] && grep -q '^==' <<<"${out:-}"; then
+		printf '%s\n' "$out" | sed 's/^/       | /'
+	fi
+	return 0
+}
 
 echo "== valid maps (expect OK)"
 for m in tests/maps/valid/*.ber assets/maps/*.ber; do
