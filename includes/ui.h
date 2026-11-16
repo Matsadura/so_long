@@ -13,17 +13,22 @@
 # define FOOTER_PX     28
 # define MIN_VIEW_W    768
 
-# define COLOR_BG      0x0B0E14FFu
-# define COLOR_HUD     0x151A23FFu
-# define COLOR_TEXT    0xE8ECF1FFu
-# define COLOR_MUTED   0x8A93A3FFu
-# define COLOR_ACCENT  0xFFD23FFFu
-# define COLOR_DANGER  0xFF5A5AFFu
-# define COLOR_OK      0x5AE38CFFu
-# define COLOR_WATER   0x7FC8FFFFu
-# define COLOR_DIM     0x05070BC8u
-# define COLOR_BAND    0x05070BA0u
+/* The original so_long palette: white on black, plus the enemy red and
+** the yellow of the unused enemy variant. Grey is white at reduced alpha. */
+# define COLOR_BG      0x000000FFu
+# define COLOR_HUD     0x000000FFu
 # define COLOR_WHITE   0xFFFFFFFFu
+# define COLOR_TEXT    COLOR_WHITE
+# define COLOR_RED     0xC50404FFu
+# define COLOR_YELLOW  0xF2F000FFu
+# define COLOR_MUTED   0xFFFFFF8Cu
+# define COLOR_FAINT   0xFFFFFF33u
+# define COLOR_ACCENT  COLOR_YELLOW
+# define COLOR_DANGER  COLOR_RED
+# define COLOR_OK      COLOR_YELLOW
+# define COLOR_WATER   COLOR_WHITE
+# define COLOR_DIM     0x000000C8u
+# define COLOR_BAND    0x000000B4u
 
 typedef enum e_sprite
 {
@@ -36,7 +41,7 @@ typedef enum e_sprite
 	SPR_ROAD,
 	SPR_WATER_A,
 	SPR_WATER_B,
-	SPR_COIN,
+	SPR_COLLECTIBLE,
 	SPR_EXIT_CLOSED,
 	SPR_EXIT_OPEN,
 	SPR_CAR,
@@ -45,7 +50,6 @@ typedef enum e_sprite
 	SPR_LOG_LEFT,
 	SPR_LOG_MID,
 	SPR_LOG_RIGHT,
-	SPR_HEART,
 	SPR_SPLAT,
 	SPR_SPLASH,
 	SPR_COUNT

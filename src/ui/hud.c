@@ -4,21 +4,21 @@
 
 #define HUD_SCALE    3
 #define FOOTER_SCALE 2
-#define HEART_PX     30
+#define LIFE_PX      32
 
 static void	draw_lives(t_platform *p, const t_renderer *r, const t_game *g)
 {
 	int	i;
 	int	x;
 
-	x = r->view_w - 12 - START_LIVES * HEART_PX;
+	x = r->view_w - 12 - START_LIVES * LIFE_PX;
 	i = 0;
 	while (i < START_LIVES)
 	{
-		platform_draw_ex(p, r->sprites[SPR_HEART],
-			(const int [4]){x + i * HEART_PX, (HUD_PX - HEART_PX) / 2 + 1,
-			HEART_PX, HEART_PX},
-			i < g->lives ? COLOR_WHITE : 0x3A404CFFu, false);
+		platform_draw_ex(p, r->sprites[SPR_PLAYER_A],
+			(const int [4]){x + i * LIFE_PX, (HUD_PX - LIFE_PX) / 2,
+			LIFE_PX, LIFE_PX},
+			i < g->lives ? COLOR_WHITE : COLOR_FAINT, false);
 		i++;
 	}
 }
@@ -57,12 +57,12 @@ static void	draw_timer(t_platform *p, const t_renderer *r, const t_game *g,
 	bar_w = r->view_w * 42 / 100 - bar_x;
 	ratio = (g->time_limit > 0.0) ? g->time_left / g->time_limit : 0.0;
 	fill = (int)(bar_w * ratio);
-	color = COLOR_OK;
+	color = COLOR_WHITE;
 	if (ratio < 0.5)
 		color = COLOR_ACCENT;
 	if (ratio < 0.2)
 		color = COLOR_DANGER;
-	platform_fill_rect(p, bar_x, top + 8, bar_w, FOOTER_PX - 16, 0x262C38FFu);
+	platform_fill_rect(p, bar_x, top + 8, bar_w, FOOTER_PX - 16, COLOR_FAINT);
 	platform_fill_rect(p, bar_x, top + 8, fill, FOOTER_PX - 16, color);
 }
 

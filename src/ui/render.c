@@ -13,7 +13,7 @@ static const char	*g_sprite_paths[SPR_COUNT] = {
 [SPR_ROAD] = "assets/sprites/road.png",
 [SPR_WATER_A] = "assets/sprites/water_1.png",
 [SPR_WATER_B] = "assets/sprites/water_2.png",
-[SPR_COIN] = "assets/sprites/coin.png",
+[SPR_COLLECTIBLE] = "assets/sprites/collectible.png",
 [SPR_EXIT_CLOSED] = "assets/sprites/exit_closed.png",
 [SPR_EXIT_OPEN] = "assets/sprites/exit_open.png",
 [SPR_CAR] = "assets/sprites/car.png",
@@ -22,14 +22,13 @@ static const char	*g_sprite_paths[SPR_COUNT] = {
 [SPR_LOG_LEFT] = "assets/sprites/log_left.png",
 [SPR_LOG_MID] = "assets/sprites/log_mid.png",
 [SPR_LOG_RIGHT] = "assets/sprites/log_right.png",
-[SPR_HEART] = "assets/sprites/heart.png",
 [SPR_SPLAT] = "assets/sprites/splat.png",
 [SPR_SPLASH] = "assets/sprites/splash.png",
 };
 
+/* Lane tints stay inside the original palette. */
 static const uint32_t	g_car_colors[] = {
-	0xFF5A5AFFu, 0x5AC8FFFFu, 0xFFD23FFFu, 0x5AE38CFFu, 0xC77DFFFFu,
-	0xFF9F43FFu,
+	COLOR_WHITE, COLOR_RED, COLOR_YELLOW,
 };
 
 /* Textures are owned by the platform cache and freed in platform_destroy. */
@@ -161,14 +160,14 @@ static void	draw_items(t_renderer *r, t_platform *p, const t_game *g)
 		if (t == TILE_COLLECTIBLE)
 		{
 			rect[1] -= (int)(3 * sinf((float)g->anim_time * 4.0f + i));
-			draw_sprite(p, r, SPR_COIN, rect);
+			draw_sprite(p, r, SPR_COLLECTIBLE, rect);
 		}
 		else if (t == TILE_EXIT)
 			draw_sprite(p, r, open ? SPR_EXIT_OPEN : SPR_EXIT_CLOSED, rect);
 		else if (t == TILE_GOAL_FILLED)
 		{
 			draw_sprite(p, r, SPR_EXIT_OPEN, rect);
-			platform_draw_ex(p, r->sprites[SPR_PLAYER_A], rect, COLOR_OK,
+			platform_draw_ex(p, r->sprites[SPR_PLAYER_A], rect, COLOR_YELLOW,
 				false);
 		}
 	}
